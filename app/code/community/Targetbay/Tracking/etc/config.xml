@@ -1,0 +1,493 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * @author Targetbay
+ * @copyright 2016 Sathishkumar Mariappan <sathishkumar.m@innoppl.com>
+ * @package Targetbay_Tracking
+ */
+-->
+<config>
+	<modules>
+		<Targetbay_Tracking>
+			<version>5.1.1</version>
+		</Targetbay_Tracking>
+	</modules>
+	<frontend>
+		<routers>
+			<tracking>
+				<use>standard</use>
+				<args>
+					<module>Targetbay_Tracking</module>
+					<frontName>tracking</frontName>
+				</args>
+			</tracking>
+		</routers>
+		<layout>
+			<updates>
+				<tracking>
+					<file>tracking.xml</file>
+				</tracking>
+			</updates>
+		</layout>
+		<events>
+			<controller_action_postdispatch>
+				<observers>
+					<pagevisit>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushPageVisitData</method>
+					</pagevisit>
+				</observers>
+			</controller_action_postdispatch>
+		</events>
+	</frontend>
+	<global>
+		<blocks>
+			<richsnippets>
+				<rewrite>
+				    <product>Targetbay_Tracking_Block_Product_Product</product>
+				</rewrite>
+			</richsnippets>
+			<tracking>
+				<class>Targetbay_Tracking_Block</class>
+			</tracking>
+		</blocks>
+		<helpers>
+			<tracking>
+				<class>Targetbay_Tracking_Helper</class>
+			</tracking>
+		</helpers>
+		<models>
+			<tracking>
+				<class>Targetbay_Tracking_Model</class>
+				<resourceModel>tracking_mysql4</resourceModel>
+			</tracking>
+			<customer>
+				<rewrite>
+				    <customer>Targetbay_Tracking_Model_Customer</customer>
+				</rewrite>
+			</customer>
+			<newsletter>
+				<rewrite>
+				    <subscriber>Targetbay_Tracking_Model_Subscriber</subscriber>
+				</rewrite>
+			</newsletter>
+		</models>
+		<events>			
+			<!-- cms page event -->
+			<controller_action_postdispatch_cms_index_index>
+				<observers>
+					<cms_page_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</cms_page_index>
+				</observers>
+			</controller_action_postdispatch_cms_index_index>
+			
+			<!-- static page event -->
+			<controller_action_postdispatch_cms_page_view>
+				<observers>
+					<cms_page_view>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</cms_page_view>
+				</observers>
+			</controller_action_postdispatch_cms_page_view>
+			
+			<!-- cart add event -->
+			<checkout_cart_add_product_complete>
+				<observers>
+					<sales_quote_add_item_handler>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushAddToCart</method>
+					</sales_quote_add_item_handler>
+				</observers>
+			</checkout_cart_add_product_complete>
+
+			<!-- cart remove item -->
+			<sales_quote_remove_item>
+				<observers>
+					<sales_quote_remove_item_handler>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushRemoveCartItemData</method>
+					</sales_quote_remove_item_handler>
+				</observers>
+			</sales_quote_remove_item>
+
+			<!-- cart update event -->
+			<checkout_cart_update_items_before>
+				<observers>
+					<update_cart_observer>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushUpdateCartData</method>
+					</update_cart_observer>
+				</observers>
+			</checkout_cart_update_items_before>
+
+			<!-- cart empty action -->
+			<controller_action_predispatch_checkout_cart_updatePost>
+				<observers>
+					<empty_cart_observer>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushEmptyCartData</method>
+					</empty_cart_observer>
+				</observers>
+			</controller_action_predispatch_checkout_cart_updatePost>
+
+			<!-- create order event -->
+			<sales_order_save_after>
+				<observers>
+					<sales_order_place_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushOrderData</method>
+					</sales_order_place_after>
+				</observers>
+			</sales_order_save_after>
+
+			<!-- create shipment event >
+			<sales_order_shipment_save_after>
+				<observers>
+					<sales_order_shipment_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushOrderShipmentData</method>
+					</sales_order_shipment_after>
+				</observers>
+			</sales_order_shipment_save_after-->
+
+			<!-- customer login event -->
+			<customer_login>
+				<observers>
+					<customer_login_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>customerLoginPushData</method>
+					</customer_login_handler>
+				</observers>
+			</customer_login>
+			
+			<!-- customer logout event -->
+			<customer_logout>
+				<observers>
+					<customer_logout_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>customerLogoutPushData</method>
+					</customer_logout_handler>
+				</observers>
+			</customer_logout>
+
+			<!-- customer register event -->
+			<customer_register_success>
+				<observers>
+					<customer_register_success_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>customerRegisterPushData</method>
+					</customer_register_success_handler>
+				</observers>
+			</customer_register_success>
+
+			<!-- customer change address -->
+			<controller_action_postdispatch_customer_address_formPost>
+				<observers>
+					<customer_change_address_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>pushCustomerAddressData</method>
+					</customer_change_address_handler>
+				</observers>
+			</controller_action_postdispatch_customer_address_formPost>
+
+			<!-- customer change account information -->
+			<controller_action_postdispatch_customer_account_editPost>
+				<observers>
+					<customer_change_address_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>pushCustomerAccountData</method>
+					</customer_change_address_handler>
+				</observers>
+			</controller_action_postdispatch_customer_account_editPost>
+
+			<!-- admin confirm customer registeration event -->
+			<adminhtml_customer_save_after>
+				<observers>
+					<customer_account_activation>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>customerAdminConfirmData</method>
+					</customer_account_activation>
+				</observers>
+			</adminhtml_customer_save_after>
+
+			<!-- newsletter save event -->
+			<controller_action_postdispatch_newsletter_subscriber_new>
+				<observers>
+					<subscribe_newsletter_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>pushSubscriptionData</method>
+					</subscribe_newsletter_handler>
+				</observers>
+			</controller_action_postdispatch_newsletter_subscriber_new>
+
+			<controller_action_postdispatch_newsletter_manage_save>
+				<observers>
+					<subscribe_newsletter_handler>
+						<type>model</type>
+						<class>tracking/observer</class>
+						<method>pushSubscriptionData</method>
+					</subscribe_newsletter_handler>
+				</observers>
+			</controller_action_postdispatch_newsletter_manage_save>
+
+			<!-- catalog product save event -->			
+			<catalog_product_save_after>
+				<observers>
+					<catalog_product_save_before_handler>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushProductData</method>
+					</catalog_product_save_before_handler>
+				</observers>
+			</catalog_product_save_after>
+
+			<!-- catalog product delete event -->
+			<catalog_product_delete_before>
+				<observers>
+					<catalog_product_delete_before_handler>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushDeleteProductData</method>
+					</catalog_product_delete_before_handler>
+				</observers>
+			</catalog_product_delete_before>
+
+			<!-- checkout steps starts -->
+			<controller_action_postdispatch_checkout_cart_index>
+				<observers>
+					<checkout_cart>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCartData</method>
+					</checkout_cart>
+				</observers>
+			</controller_action_postdispatch_checkout_cart_index>
+
+			<controller_action_postdispatch_firecheckout_index_index>
+				<observers>
+					<firecheckout_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCheckoutPageData</method>
+					</firecheckout_index>
+				</observers>
+			</controller_action_postdispatch_firecheckout_index_index>
+
+			<controller_action_postdispatch_onestepcheckout_index_index>
+				<observers>
+					<onestepcheckout_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCheckoutPageData</method>
+					</onestepcheckout_index>
+				</observers>
+			</controller_action_postdispatch_onestepcheckout_index_index>
+
+			<controller_action_postdispatch_checkout_onepage_index>
+				<observers>
+					<checkout_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCheckoutPageData</method>
+					</checkout_index>
+				</observers>
+			</controller_action_postdispatch_checkout_onepage_index>
+
+			<controller_action_postdispatch_checkout_onepage_saveShippingMethod>
+				<observers>
+					<checkout_saveshippingmethod_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>saveShippingMethod</method>
+					</checkout_saveshippingmethod_after>
+				</observers>
+			</controller_action_postdispatch_checkout_onepage_saveShippingMethod>
+
+			<controller_action_postdispatch_checkout_onepage_savePayment>
+				<observers>
+					<checkout_savepayment_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>savePayment</method>
+					</checkout_savepayment_after>
+				</observers>
+			</controller_action_postdispatch_checkout_onepage_savePayment>
+
+			<sales_convert_quote_to_order>
+				<observers>
+					<sales_order_place_before>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCheckoutAddressData</method>
+					</sales_order_place_before>
+				</observers>
+			</sales_convert_quote_to_order>
+			<!-- checkout steps ends -->
+
+			<!-- product view event -->
+			<controller_action_postdispatch_catalog_product_view>
+				<observers>
+					<catalog_product_view_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushProductViewData</method>
+					</catalog_product_view_after>
+				</observers>
+			</controller_action_postdispatch_catalog_product_view>
+
+			<!-- category view event -->
+			<controller_action_postdispatch_catalog_category_view>
+				<observers>
+					<catalog_category_view_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushCategoryViewData</method>
+					</catalog_category_view_after>
+				</observers>
+			</controller_action_postdispatch_catalog_category_view>
+
+			<!-- catalog search event -->
+			<controller_action_postdispatch_catalogsearch_result_index>
+				<observers>
+					<catalogsearch>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushSearchQueryData</method>
+					</catalogsearch>
+				</observers>
+			</controller_action_postdispatch_catalogsearch_result_index>
+
+			<!-- wishlist item capture -->
+			<wishlist_product_add_after>
+				<observers>
+					<wishlist>
+						<class>tracking/observer</class>
+						<method>pushAddWishlistData</method>
+					</wishlist>
+				</observers>
+			</wishlist_product_add_after>
+
+			<controller_action_predispatch_wishlist_index_update>
+				<observers>
+					<wishlist_index_update>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushUpdateWishlistData</method>
+					</wishlist_index_update>
+				</observers>
+			</controller_action_predispatch_wishlist_index_update>
+
+			<controller_action_predispatch_wishlist_index_remove>
+				<observers>
+					<wishlist_index_remove>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>removeWhislistItem</method>
+					</wishlist_index_remove>
+				</observers>
+			</controller_action_predispatch_wishlist_index_remove>
+
+			<controller_action_predispatch_wishlist_index_index>
+				<observers>
+					<wishlist_index_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</wishlist_index_index>
+				</observers>
+			</controller_action_predispatch_wishlist_index_index>
+
+			<controller_action_postdispatch_sales_order_history>
+				<observers>
+					<sales_order_history>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</sales_order_history>
+				</observers>
+			</controller_action_postdispatch_sales_order_history>
+
+			<controller_action_postdispatch_sales_order_view>
+				<observers>
+					<sales_order_view>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</sales_order_view>
+				</observers>
+			</controller_action_postdispatch_sales_order_view>
+
+			<controller_action_postdispatch_review_customer_index>
+				<observers>
+					<review_customer_index>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>cmsPageVisit</method>
+					</review_customer_index>
+				</observers>
+			</controller_action_postdispatch_review_customer_index>
+		</events>
+	</global>
+
+
+	<!-- Added default values -->
+	<default>
+		<targetbay_tracking>
+			<tracking_groups>
+				<enabled>1</enabled>
+				<hostname><![CDATA[http://dev.targetbay.com/api/v1/webhooks/]]></hostname>
+				<message_js><![CDATA[http://dev.targetbay.com/js/tb-messages.js]]></message_js>
+				<review_js><![CDATA[http://dev.targetbay.com/js/tb-reviews.js]]></review_js>
+				<api_token>6e1c1435-ccc9-45e4-9eb6-a1a7bbbaf2e9</api_token>
+				<api_index>cccc8aea-ebcd-5466-8698-3657a3aa1169</api_index>
+				<debug>1</debug>
+				<debug_file>tracking.log</debug_file>
+				<page_types>all</page_types>
+			</tracking_groups>
+		</targetbay_tracking>
+	</default>
+
+
+	<!-- ACL for tracking configurations -->
+	<adminhtml>
+		<acl>
+			<resources>
+				<admin>
+					<children>
+						<system>
+							<children>
+								<config>
+									<children>
+										<targetbay_tracking translate="title"
+											module="tracking">
+											<title>Tracking</title>
+										</targetbay_tracking>
+									</children>
+								</config>
+							</children>
+						</system>
+					</children>
+				</admin>
+			</resources>
+		</acl>
+	</adminhtml>
+</config> 

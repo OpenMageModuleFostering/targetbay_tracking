@@ -1,0 +1,615 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * @author Targetbay
+ * @copyright 2016 Sathishkumar Mariappan <sathishkumar.m@innoppl.com>
+ * @package Targetbay_Tracking
+ */
+-->
+<config>
+	<api2>
+		<resource_groups>
+			<tracking translate="title" module="targetbay_tracking">
+				<title>Totalcounts for Tagrgetbay</title>
+				<sort_order>10</sort_order>
+			</tracking>
+		</resource_groups>
+		<resources>
+			<tracking translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalinfo</model>
+				<title>Totalcounts</title>
+				<sort_order>10</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalcounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking>
+			<tracking_productcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalproductinfo</model>
+				<title>Total Product Counts</title>
+				<sort_order>20</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalproductcounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_productcount>
+			<tracking_product translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_product</model>
+				<working_model>catalog/product</working_model>
+				<title>Targetbay Export Products</title>
+				<sort_order>30</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes
+					translate="entity_id type_id attribute_set_id stock_data image_url is_saleable total_reviews_count url buy_now_url has_custom_options is_in_stock regular_price_with_tax regular_price_without_tax final_price_with_tax final_price_without_tax use_config_gift_message_available use_config_gift_wrapping_available url_key_create_redirect addional_attributes"
+					module="api2">
+					<entity_id>Product ID</entity_id>
+					<type_id>Product Type</type_id>
+					<attribute_set_id>Attribute Set</attribute_set_id>
+					<stock_data>Inventory Data</stock_data>
+					<image_url>Default Image</image_url>
+					<is_saleable>Salability Status</is_saleable>
+					<total_reviews_count>Total Reviews Count</total_reviews_count>
+					<url>Product URL</url>
+					<url_key>Product URL Key</url_key>
+					<buy_now_url>Buy Now URL</buy_now_url>
+					<has_custom_options>Has Custom Options</has_custom_options>
+					<is_in_stock>Stock Status</is_in_stock>
+					<special_price>Special price</special_price>
+					<regular_price_with_tax>Regular Price With Tax
+					</regular_price_with_tax>
+					<regular_price_without_tax>Regular Price Without Tax
+					</regular_price_without_tax>
+					<final_price_with_tax>Final Price With Tax</final_price_with_tax>
+					<final_price_without_tax>Final Price Without Tax
+					</final_price_without_tax>
+					<use_config_gift_message_available>Use Config Settings for Allow
+						Gift Message
+					</use_config_gift_message_available>
+					<use_config_gift_wrapping_available>Use Config Settings for Allow
+						Gift Wrapping
+					</use_config_gift_wrapping_available>
+					<url_key_create_redirect>Create Permanent Redirect for old URL
+					</url_key_create_redirect>
+					<qty>Product Qty</qty>
+					<visibility>Product Viibility</visibility>
+					<status>Product Status</status>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+					<child_items>Child Product Items</child_items>
+					<parent_id>Parent Product Id</parent_id>
+					<category_id>Category Id</category_id>
+					<related_product_id>Related Product Id</related_product_id>
+					<upsell_product_id>Upsell Product Id</upsell_product_id>
+					<crosssell_product_id>Crosssell Product Id</crosssell_product_id>
+					<addional_attributes>Additional attributes</addional_attributes>
+				</attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/products</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_product>
+			<tracking_ordercount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalorderinfo</model>
+				<title>Total Order Counts</title>
+				<sort_order>40</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalordercounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_ordercount>
+			<tracking_orders translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_orders</model>
+				<title>Targetbay Export Orders</title>
+				<sort_order>40</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes
+					translate="entity_id increment_id created_at status shipping_description _payment_method base_currency_code store_currency_code store_name remote_ip store_to_order_rate subtotal subtotal_incl_tax discount_amount base_grand_total grand_total shipping_amount shipping_tax_amount shipping_incl_tax tax_amount _tax_name _tax_rate coupon_code base_discount_amount base_subtotal base_shipping_amount base_shipping_tax_amount base_tax_amount total_paid base_total_paid total_refunded base_total_refunded base_subtotal_incl_tax base_total_due total_due shipping_discount_amount base_shipping_discount_amount discount_description customer_balance_amount base_customer_balance_amount base_customer_balance_amount _gift_message _order_comments customer_id"
+					module="api2">
+					<entity_id>Order ID (internal)</entity_id>
+					<increment_id>Order ID</increment_id>
+					<created_at>Order Date</created_at>
+					<status>Order Status</status>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+					<shipping_description>Shipping Method</shipping_description>
+					<payment_method>Payment Method</payment_method>
+					<base_currency_code>Base Currency</base_currency_code>
+					<store_currency_code>Order Currency</store_currency_code>
+					<store_name>Store Name</store_name>
+					<remote_ip>Placed from IP</remote_ip>
+					<store_to_order_rate>Store Currency to Order Currency Rate
+					</store_to_order_rate>
+					<subtotal>Subtotal</subtotal>
+					<subtotal_incl_tax>Subtotal Including Tax</subtotal_incl_tax>
+					<discount_amount>Discount</discount_amount>
+					<base_grand_total>Grand Total to Be Charged</base_grand_total>
+					<grand_total>Grand Total</grand_total>
+					<shipping_amount>Shipping Amount</shipping_amount>
+					<shipping_tax_amount>Shipping Including Tax</shipping_tax_amount>
+					<shipping_incl_tax>Shipping Tax</shipping_incl_tax>
+					<tax_amount>Tax Amount</tax_amount>
+					<_tax_name>Tax Name</_tax_name>
+					<_tax_rate>Tax Rate</_tax_rate>
+					<coupon_code>Coupon Code</coupon_code>
+					<base_discount_amount>Base Discount</base_discount_amount>
+					<base_subtotal>Base Subtotal</base_subtotal>
+					<base_shipping_amount>Base Shipping</base_shipping_amount>
+					<base_shipping_tax_amount>Base Shipping Tax
+					</base_shipping_tax_amount>
+					<base_tax_amount>Base Tax Amount</base_tax_amount>
+					<total_paid>Total Paid</total_paid>
+					<base_total_paid>Base Total Paid</base_total_paid>
+					<total_refunded>Total Refunded</total_refunded>
+					<base_total_refunded>Base Total Refunded</base_total_refunded>
+					<base_subtotal_incl_tax>Base Subtotal Including Tax
+					</base_subtotal_incl_tax>
+					<base_total_due>Base Total Due</base_total_due>
+					<total_due>Total Due</total_due>
+					<shipping_discount_amount>Shipping Discount
+					</shipping_discount_amount>
+					<base_shipping_discount_amount>Base Shipping Discount
+					</base_shipping_discount_amount>
+					<discount_description>Discount Description</discount_description>
+					<customer_balance_amount>Customer Balance</customer_balance_amount>
+					<base_customer_balance_amount>Base Customer Balance
+					</base_customer_balance_amount>
+					<_gift_message>Gift Message</_gift_message>
+					<_order_comments>Order Comments</_order_comments>
+					<customer_id>Customer ID</customer_id>
+					<cart_items>Order Items</cart_items>
+					<billing>Billing Info</billing>
+					<shipping>Shipping Info	</shipping>
+				</attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/orders</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_orders>
+			<tracking_categorycount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalcategoryinfo</model>
+				<title>Total Category Counts</title>
+				<sort_order>50</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalcategorycounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_categorycount>
+			<tracking_category translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_category</model>
+				<title>Targetbay Export Categories</title>
+				<sort_order>60</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<entity_id>Category ID</entity_id>
+					<name>Name</name>
+					<parent_id>Category Parent ID</parent_id>
+					<is_active>Active</is_active>
+					<level>Level</level>
+					<position>Position</position>
+					<children>Children Ids</children>
+					<url_key>URL key</url_key>
+					<website_id>Website Id</website_id>
+					<store_id>Store ID</store_id>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/categories</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_category>
+			<tracking_customercount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalcustomerinfo</model>
+				<title>Total Customer Counts</title>
+				<sort_order>70</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalcustomercounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_customercount>
+			<tracking_customer translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_customer</model>
+				<title>Targetbay Export Customer</title>
+				<sort_order>75</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<entity_id>Customer ID</entity_id>
+					<firstname>First Name</firstname>
+					<lastname>Last Name</lastname>
+					<email>Email</email>
+					<website_id>Associate to Website</website_id>
+					<store_id>Store Id</store_id>
+					<customer_group>Customer Group</customer_group>
+					<subcription_status>Subcription</subcription_status>
+					<billing_address>Billing info</billing_address>
+					<shipping_address>Shipping info</shipping_address>
+					<additional_address>Address info</additional_address>
+					<created_at>Created From</created_at>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/customer</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_customer>
+			<tracking_cartitemcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalcartiteminfo</model>
+				<title>Total CartItem Counts</title>
+				<sort_order>80</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalcartitemcounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_cartitemcount>
+			<tracking_cartitem translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_cartitem</model>
+				<title>Targetbay Export Cart Items</title>
+				<sort_order>90</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<entity_id>Quote ID</entity_id>
+					<customer_id>Customer Id</customer_id>
+					<customer_email>Customer Email</customer_email>
+					<abandonded_at>Update At</abandonded_at>
+					<item_id>Item Id</item_id>
+					<cart_items>Cart Items</cart_items>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/cartitems</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_cartitem>
+			<tracking_wishlistcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalwishlistinfo</model>
+				<title>Total Wishlist Counts</title>
+				<sort_order>110</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalwishlistcounts</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_wishlistcount>
+			<tracking_wishlist translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_wishlist</model>
+				<title>Targetbay Export Wishlist Items</title>
+				<sort_order>120</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<wishlist_id>Wishlist ID</wishlist_id>
+					<customer_id>Customer ID</customer_id>
+					<updated_at>Updated At</updated_at>
+					<item_details>Item Details</item_details>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/wishlistitem</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_wishlist>
+			<tracking_reviewcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalreviewinfo</model>
+				<title>Total Review Counts</title>
+				<sort_order>130</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalreviewcount</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_reviewcount>
+			<tracking_review translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_review</model>
+				<title>Targetbay Export Review</title>
+				<sort_order>140</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<review_id>Review ID</review_id>
+					<customer_id>Customer ID</customer_id>
+					<title>Review title</title>
+					<detail>Review detail</detail>
+					<nickname>Customer Name</nickname>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/reviews</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_review>
+			<tracking_createsubscription translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_createsubscription</model>
+				<title>Create Newsletter Subscription</title>
+				<sort_order>150</sort_order>
+				<privileges>
+					<guest>
+						<create>1</create>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<email_id>Email ID</email_id>
+					<status>Status</status>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/create</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_createsubscription>
+			<tracking_updatesubscription translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_updatesubscription</model>
+				<title>Update Subscription</title>
+				<sort_order>155</sort_order>
+				<privileges>
+					<guest>
+						<create>1</create>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<email_id>Email ID</email_id>
+					<status>Status</status>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/update</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_updatesubscription>
+			<tracking_shipmentcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalshipmentinfo</model>
+				<title>Total Shipment Counts</title>
+				<sort_order>160</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalshipmentcount</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_shipmentcount>
+			<tracking_shipment translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_shipment</model>
+				<title>Targetbay Export Shipment</title>
+				<sort_order>165</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes module="api2">
+					<order_id>Order ID (internal)</order_id>
+					<increment_id>Order ID</increment_id>
+					<created_at>Order Date</created_at>
+					<order_status>Order Status</order_status>
+					<website_id>Website Id</website_id>
+					<store_id>Store Id</store_id>
+					<total_ordered_qty>Total ordered quantity</total_ordered_qty>
+					<updated_at>Order Shipment Created Date</updated_at>
+					<user_id>Customer Id</user_id>
+					<user_mail>Customer Mail</user_mail>
+					<product_id>Product Id</product_id>
+					<name>Product Name</name>
+					<sku>Product Sku</sku>
+					<qty_ordered>Total item quantity</qty_ordered>
+					<shipment_items>Order Items</shipment_items>
+					<cart_items>Order Items</cart_items>
+				</attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/shipment</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_shipment>
+			<tracking_stores translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_stores</model>
+				<title>Targetbay Export Stores</title>
+				<sort_order>170</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<store_id>Store ID</store_id>
+					<store_name>Store Name</store_name>
+					<website_id>Website Id</website_id>
+					<website_name>Website Name</website_name>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/stores</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_stores>
+			<tracking_subscribercount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_totalsubscriberinfo</model>
+				<title>Total Subscriber Counts</title>
+				<sort_order>175</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<routes>
+					<route_collection>
+						<route>/targetbay/totalsubscribercount</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_subscribercount>
+			<tracking_subscriber translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_subscriber</model>
+				<title>Subscriber</title>
+				<sort_order>180</sort_order>
+				<privileges>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<subscriber_id>Subscriber Id</subscriber_id>
+					<store_id>Store ID</store_id>
+					<customer_id>Customer ID</customer_id>
+					<subscriber_email>Subscriber Email</subscriber_email>
+					<subscriber_status>Subscriber Status</subscriber_status>
+			        </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/subscriber</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_subscriber>
+		</resources>
+	</api2>
+</config>

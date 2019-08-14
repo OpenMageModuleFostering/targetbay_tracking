@@ -1,0 +1,120 @@
+<?php
+$pageVisitData = ''; $pageVisitUrl = ''; $trackingTypeVal = '';
+$pname = ''; $pid = ''; $purl = ''; $pimage = '';
+$controllerData = array('index','category','product');
+$controllername = Mage::app()->getRequest()->getControllerName();
+$modulename = Mage::app()->getRequest()->getModuleName();
+$trackingHelper = Mage::helper('tracking');
+$userSession = Mage::getSingleton('customer/session');
+
+$hostUrl = $trackingHelper->getHostname();
+$apiToken = $trackingHelper->getApiToken();
+$apiKey = $trackingHelper->getApiIndex();
+$apiStatus = $trackingHelper->getApiStatus();
+$vistorId = Mage::getSingleton('core/session')->getTrackingSessionId();
+$vistorName = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
+
+$moduleVersion = $trackingHelper->getProductVersion();
+$trackingType = $trackingHelper->getTrackingType();
+
+if($trackingType == 1) :
+	$pageVisitUrl = $trackingHelper->getApiUrl();
+	$pageVisitData = $trackingHelper->getPageInfo();
+	$trackingTypeVal = $trackingType;
+endif;
+
+if($modulename == 'catalog' && $controllername == 'product') {
+	$product = Mage::registry('current_product');
+	$pname = addslashes($product->getName());
+	$pid = $product->getId();
+	$pimage = $trackingHelper->getImageUrl($product, 'image');
+	$purl = Mage::getUrl().$product->getUrlPath();
+}
+$trackingScript = $trackingHelper->getTrackingScript();
+
+if($trackingScript) {
+	$trackingCode = $trackingScript;
+} else {
+	$trackingCode = 'tbTrack: true,
+			 tbMessage: true,
+			 tbReview: {
+				tbSiteReview: true,	
+				tbProductReview: true,
+				tbBulkReview: true,
+				tbQa: true
+				}';
+}
+?>
+
+<div id="targetbay_message"></div>
+<div id="targetbay_site_reviews"></div>
+
+<script type="text/javascript">
+tbConfig = {
+	apiStatus: '<?php echo $apiStatus; ?>',
+	apiKey: '<?php echo $apiKey;?>',
+	apiToken: '<?php echo $apiToken;?>',
+	apiUrl: '<?php echo $hostUrl;?>',
+	apiVersion: 'v1',
+	trackingType: '<?php echo $trackingType;?>',
+	moduleVersion:'<?php echo $moduleVersion; ?>',
+	productName: '<?php echo $pname; ?>',
+	productId: '<?php echo $pid; ?>',
+	productImageUrl: '<?php echo $pimage; ?>',
+	productUrl: '<?php echo $purl; ?>',
+	userId: '<?php echo $userSession->isLoggedIn()?$userSession->getId():$vistorId?>',
+	userMail: '<?php echo $userSession->isLoggedIn()?$userSession->getCustomer()->getEmail():''?>',	
+	userName: '<?php echo $userSession->isLoggedIn()?$userSession->getCustomer()->getName():$vistorName?>',
+	userAvatar: '',
+	pageUrl: '<?php echo $pageVisitUrl;?>',
+	pageData: '<?php echo json_encode($pageVisitData);?>',
+	<?php echo $trackingCode; ?>
+	
+};
+(function (d, u, tb) {
+	var s = d.scripts[0],
+	i = u.length, g;
+	while (i--) {
+	g = d.createElement('script');
+	g.src = 'https://' + tb.apiStatus + '.targetbay.com/js/tb-' + u[i] + '.js';
+	g.type = 'text/javascript';
+	g.async = 'true';
+	s.parentNode.insertBefore(g, s);
+	}
+})(document, [
+'track'
+], tbConfig);
+</script>
+<?php $siteReviewSnippets = $trackingHelper->getSiteReviewSnippets();?>
+<?php if(!empty($siteReviewSnippets) && $siteReviewSnippets['average_score'] > 0): ?>
+<div itemscope itemtype="http://schema.org/Organization">
+	<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+		<span itemprop="bestRating" content="5"></span> 
+		<span itemprop="ratingValue" content="<?php echo $siteReviewSnippets['average_score']; ?>"></span> 
+		<span itemprop="reviewCount" content="<?php echo $siteReviewSnippets['reviews_count']; ?>"></span>
+	</div>
+	<?php if($siteReviewSnippets['reviews_count'] > 0):  ?> 
+	<?php foreach($siteReviewSnippets['reviews']  as $key => $aggregateReviewDetails): ?>
+		<?php $reviewId = $aggregateReviewDetails->_id; ?>
+		<?php $reviewTitle = $aggregateReviewDetails->_source->title; ?>
+		<?php $review = $aggregateReviewDetails->_source->message;; ?>
+		<?php $timestamp = $aggregateReviewDetails->_source->timestamp; ?>
+		<?php $reviewRating = $aggregateReviewDetails->_source->review_rating; ?>
+		<?php $userName = $aggregateReviewDetails->_source->user_name; ?>
+
+		<div itemprop="review" id="<?php echo 'tb-site-review-'.$key; ?>" itemscope itemtype="http://schema.org/Review" data-reviewid="<?php echo $reviewId; ?>">
+			<span itemprop="name" content="<?php echo $reviewTitle; ?>"></span> 
+			<span itemprop="description" content="<?php echo $review; ?>"></span> 
+			<span itemprop="datePublished" content="<?php echo date('m/d/Y', $timestamp); ?>"></span>
+			<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
+				<span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span> 
+				<span itemprop="bestRating" content="5"></span>
+			</div>
+			<div itemprop="author" itemscope itemtype="http://schema.org/Thing">
+				<span itemprop="name" content="<?php echo $userName; ?>"></span>
+			</div>
+		</div>
+	<?php  endforeach; ?>
+	<?php endif; ?>
+</div>
+<?php endif; ?>
