@@ -1,9 +1,11 @@
 <?php
+
 /*
  * @author Targetbay
  * @copyright 2016 Sathishkumar Mariappan <sathishkumar.m@innoppl.com>
  * @package Targetbay_Tracking
  */
+
 class Targetbay_Tracking_Model_System_Config_Source_Version
 {
     /**

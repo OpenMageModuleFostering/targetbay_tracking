@@ -21,6 +21,9 @@
 				<title>Totalcounts</title>
 				<sort_order>10</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -39,6 +42,9 @@
 				<title>Total Product Counts</title>
 				<sort_order>20</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -58,6 +64,9 @@
 				<title>Targetbay Export Products</title>
 				<sort_order>30</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -70,6 +79,7 @@
 					<attribute_set_id>Attribute Set</attribute_set_id>
 					<stock_data>Inventory Data</stock_data>
 					<image_url>Default Image</image_url>
+					<stock_count>Stock Count</stock_count>
 					<is_saleable>Salability Status</is_saleable>
 					<total_reviews_count>Total Reviews Count</total_reviews_count>
 					<url>Product URL</url>
@@ -121,6 +131,9 @@
 				<title>Total Order Counts</title>
 				<sort_order>40</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -139,6 +152,9 @@
 				<title>Targetbay Export Orders</title>
 				<sort_order>40</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -149,6 +165,8 @@
 					<entity_id>Order ID (internal)</entity_id>
 					<increment_id>Order ID</increment_id>
 					<created_at>Order Date</created_at>
+					<shipped_at>Shipment Date</shipped_at>
+					<timezone>Time Zone</timezone>
 					<status>Order Status</status>
 					<website_id>Website Id</website_id>
 					<store_id>Store Id</store_id>
@@ -215,6 +233,9 @@
 				<title>Total Category Counts</title>
 				<sort_order>50</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -233,6 +254,9 @@
 				<title>Targetbay Export Categories</title>
 				<sort_order>60</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -263,6 +287,9 @@
 				<title>Total Customer Counts</title>
 				<sort_order>70</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -281,6 +308,9 @@
 				<title>Targetbay Export Customer</title>
 				<sort_order>75</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -313,6 +343,9 @@
 				<title>Total CartItem Counts</title>
 				<sort_order>80</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -331,6 +364,9 @@
 				<title>Targetbay Export Cart Items</title>
 				<sort_order>90</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -357,6 +393,9 @@
 				<title>Total Wishlist Counts</title>
 				<sort_order>110</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -375,6 +414,9 @@
 				<title>Targetbay Export Wishlist Items</title>
 				<sort_order>120</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -401,6 +443,9 @@
 				<title>Total Review Counts</title>
 				<sort_order>130</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -419,6 +464,9 @@
 				<title>Targetbay Export Review</title>
 				<sort_order>140</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -446,6 +494,10 @@
 				<title>Create Newsletter Subscription</title>
 				<sort_order>150</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+						<create>1</create>
+                    </admin>
 					<guest>
 						<create>1</create>
 						<retrieve>1</retrieve>
@@ -471,6 +523,10 @@
 				<title>Update Subscription</title>
 				<sort_order>155</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+						<create>1</create>
+                    </admin>
 					<guest>
 						<create>1</create>
 						<retrieve>1</retrieve>
@@ -496,6 +552,9 @@
 				<title>Total Shipment Counts</title>
 				<sort_order>160</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -514,6 +573,9 @@
 				<title>Targetbay Export Shipment</title>
 				<sort_order>165</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -550,6 +612,9 @@
 				<title>Targetbay Export Stores</title>
 				<sort_order>170</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -574,6 +639,9 @@
 				<title>Total Subscriber Counts</title>
 				<sort_order>175</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -592,6 +660,9 @@
 				<title>Subscriber</title>
 				<sort_order>180</sort_order>
 				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
 					<guest>
 						<retrieve>1</retrieve>
 					</guest>
@@ -611,6 +682,33 @@
 				</routes>
 				<versions>1</versions>
 			</tracking_subscriber>
+			<tracking_tbreviewcount translate="title" module="targetbay_tracking">
+				<group>tracking</group>
+				<model>tracking/api2_tbreviewcount</model>
+				<title>TB Review count</title>
+				<sort_order>190</sort_order>
+				<privileges>
+                    <admin>
+                        <retrieve>1</retrieve>
+                    </admin>
+					<guest>
+						<retrieve>1</retrieve>
+					</guest>
+				</privileges>
+				<attributes>
+					<product_id>Product Id</product_id>
+					<store_id>Store ID</store_id>
+					<review_count>Review Count</review_count>
+					<page_identifier>Page Identifier</page_identifier>
+			    </attributes>
+				<routes>
+					<route_collection>
+						<route>/targetbay/tbreviewcount</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</tracking_tbreviewcount>
 		</resources>
 	</api2>
 </config>

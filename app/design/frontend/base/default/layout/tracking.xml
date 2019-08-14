@@ -12,12 +12,22 @@
 			<block type="tracking/tracking" name="innpltracking" as="innpltracking" />
 		</reference>
 	</default>
+	<cms_index_index>
+		<reference name="content">
+			<block type="tracking/recommended" name="tbrecommended" as="tbrecommended" after="-" />
+		</reference>
+	</cms_index_index>
 	<catalog_product_view>
         <reference name="content">
 			<remove name="product.reviews"/>
-            <block type="tracking/product_review" name="innpl-product-review" as="innpl-product-review"
-                   after="product.info" />
+            <block type="tracking/product_review" name="innpl-product-review" as="innpl-product-review" after="product.info" />
+            <block type="tracking/product_richsnippets" name="tracking-product-richsnippets" as="tracking-richsnippets" after="product.info" />
         </reference>
+
+        <reference name="product.info.addtocart">
+			<block type="tracking/product_inventary" name="tracking-product-inventary" as="tracking-inventary" after="-" />
+        </reference>
+
 		<reference name="product.info.tabs">
 			<action method="unsetChild">
 			    <child>review</child>

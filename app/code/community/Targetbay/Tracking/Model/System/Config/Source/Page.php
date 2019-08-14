@@ -1,9 +1,11 @@
 <?php
+
 /*
  * @author Targetbay
  * @copyright 2016 Sathishkumar Mariappan <sathishkumar.m@innoppl.com>
  * @package Targetbay_Tracking
  */
+
 class Targetbay_Tracking_Model_System_Config_Source_Page
 {
     /**
@@ -90,10 +92,10 @@ class Targetbay_Tracking_Model_System_Config_Source_Page
                 'value' => Targetbay_Tracking_Helper_Data::PAGE_REFERRAL,
                 'label' => Mage::helper('adminhtml')->__('Referrer page')
             ),
-	    array (
-		'value' => Targetbay_Tracking_Helper_Data::WISHLIST,
-		'label' => Mage::helper ( 'adminhtml' )->__ ( 'Wishlist page' ) 
-	    )
+            array(
+                'value' => Targetbay_Tracking_Helper_Data::WISHLIST,
+                'label' => Mage::helper('adminhtml')->__('Wishlist page')
+            )
         );
     }
 }

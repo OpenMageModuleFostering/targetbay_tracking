@@ -1,9 +1,11 @@
 <?php
 $pageVisitData = ''; $pageVisitUrl = ''; $trackingTypeVal = '';
-$pname = ''; $pid = ''; $purl = ''; $pimage = '';
+$pname = ''; $pid = ''; $purl = ''; $lastOrderId = ''; $pimage= '';
+$defaultImage = Mage::getModel('catalog/product')->getSmallImageUrl(200, 200);
 $controllerData = array('index','category','product');
 $controllername = Mage::app()->getRequest()->getControllerName();
 $modulename = Mage::app()->getRequest()->getModuleName();
+$actionName = Mage::app()->getRequest()->getActionName();
 $trackingHelper = Mage::helper('tracking');
 $userSession = Mage::getSingleton('customer/session');
 
@@ -17,26 +19,26 @@ $vistorName = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
 $moduleVersion = $trackingHelper->getProductVersion();
 $trackingType = $trackingHelper->getTrackingType();
 
-if($trackingType == 1) :
-	$pageVisitUrl = $trackingHelper->getApiUrl();
-	$pageVisitData = $trackingHelper->getPageInfo();
-	$trackingTypeVal = $trackingType;
+if ($trackingType == 1) :
+    $pageVisitUrl = $trackingHelper->getApiUrl();
+    $pageVisitData = $trackingHelper->getPageInfo();
+    $trackingTypeVal = $trackingType;
 endif;
 
-if($modulename == 'catalog' && $controllername == 'product') {
-	$product = Mage::registry('current_product');
-	$pname = addslashes($product->getName());
-	$pid = $product->getId();
-	$pimage = $trackingHelper->getImageUrl($product, 'image');
-	$purl = Mage::getUrl().$product->getUrlPath();
+if ($modulename == 'catalog' && $controllername == 'product') {
+    $product = Mage::registry('current_product');
+    $pname = addslashes($product->getName());
+    $pid = addslashes($product->getId());
+    $pimage = $trackingHelper->getImageUrl($product, 'image');
+    $purl = Mage::getUrl() . $product->getUrlPath();
 }
 $trackingScript = $trackingHelper->getTrackingScript();
 
-if($trackingScript) {
-	$trackingCode = $trackingScript;
+if ($trackingScript) {
+    $trackingCode = $trackingScript;
 } else {
-	$trackingCode = 'tbTrack: true,
-			 tbMessage: false,
+    $trackingCode = 'tbTrack: true,
+			 tbMessage: true,
 			 tbReview: {
 				tbSiteReview: true,	
 				tbProductReview: true,
@@ -49,6 +51,13 @@ if($trackingScript) {
 <div id="targetbay_message"></div>
 <div id="targetbay_site_reviews"></div>
 
+<?php
+if ($modulename == 'checkout' && $actionName == 'success') {
+    $lastOrderId = Mage::getSingleton('checkout/session')->getLastOrderId();
+    echo '<div id="targetbay_order_reviews"></div>';
+}
+?>
+
 <script type="text/javascript">
 tbConfig = {
 	apiStatus: '<?php echo $apiStatus; ?>',
@@ -60,14 +69,16 @@ tbConfig = {
 	moduleVersion:'<?php echo $moduleVersion; ?>',
 	productName: '<?php echo $pname; ?>',
 	productId: '<?php echo $pid; ?>',
-	productImageUrl: '<?php echo $pimage; ?>',
+	productImageUrl: '<?php echo ($pimage) ? $pimage : $defaultImage; ?>',
 	productUrl: '<?php echo $purl; ?>',
-	userId: '<?php echo $userSession->isLoggedIn()?$userSession->getId():$vistorId?>',
-	userMail: '<?php echo $userSession->isLoggedIn()?$userSession->getCustomer()->getEmail():''?>',	
-	userName: '<?php echo $userSession->isLoggedIn()?$userSession->getCustomer()->getName():$vistorName?>',
+	productStockStatus: <?php echo $this->getStockAvaliability(); ?>,
+	userId: '<?php echo $userSession->isLoggedIn() ? $userSession->getId() : $vistorId?>',
+	userMail: '<?php echo $userSession->isLoggedIn() ? $userSession->getCustomer()->getEmail() : ''?>',	
+	userName: '<?php echo $userSession->isLoggedIn() ? $userSession->getCustomer()->getName() : $vistorName?>',
 	userAvatar: '',
 	pageUrl: '<?php echo $pageVisitUrl;?>',
 	pageData: '<?php echo json_encode($pageVisitData);?>',
+	orderId: '<?php echo $lastOrderId; ?>',
 	<?php echo $trackingCode; ?>
 	
 };
@@ -86,15 +97,16 @@ tbConfig = {
 ], tbConfig);
 </script>
 <?php $siteReviewSnippets = $trackingHelper->getSiteReviewSnippets();?>
-<?php if(!empty($siteReviewSnippets) && $siteReviewSnippets['average_score'] > 0): ?>
+<?php if (!empty($siteReviewSnippets) && $siteReviewSnippets['average_score'] > 0): ?>
 <div itemscope itemtype="http://schema.org/Organization">
 	<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
 		<span itemprop="bestRating" content="5"></span> 
 		<span itemprop="ratingValue" content="<?php echo $siteReviewSnippets['average_score']; ?>"></span> 
 		<span itemprop="reviewCount" content="<?php echo $siteReviewSnippets['reviews_count']; ?>"></span>
+	    <span itemprop="ratingCount" content="<?php echo $siteReviewSnippets['reviews_count']; ?>"></span>
 	</div>
-	<?php if($siteReviewSnippets['reviews_count'] > 0):  ?> 
-	<?php foreach($siteReviewSnippets['reviews']  as $key => $aggregateReviewDetails): ?>
+	<?php if ($siteReviewSnippets['reviews_count'] > 0):  ?> 
+	<?php foreach ($siteReviewSnippets['reviews']  as $key => $aggregateReviewDetails): ?>
 		<?php $reviewId = $aggregateReviewDetails->_id; ?>
 		<?php $reviewTitle = $aggregateReviewDetails->_source->title; ?>
 		<?php $review = $aggregateReviewDetails->_source->message; ?>
@@ -102,9 +114,9 @@ tbConfig = {
 		<?php $reviewRating = $aggregateReviewDetails->_source->review_rating; ?>
 		<?php $userName = $aggregateReviewDetails->_source->user_name; ?>
 
-		<div itemprop="review" id="<?php echo 'tb-site-review-'.$key; ?>" itemscope itemtype="http://schema.org/Review" data-reviewid="<?php echo $reviewId; ?>">
-			<span itemprop="name" content="<?php echo $reviewTitle; ?>"></span> 
-			<span itemprop="description" content="<?php echo $review; ?>"></span> 
+		<div itemprop="review" id="<?php echo $this->escapeHtml($reviewTitle) . '-' . $key; ?>" itemscope itemtype="http://schema.org/Review" data-reviewid="<?php echo $reviewId; ?>">
+			<span itemprop="name" content="<?php echo $this->escapeHtml($reviewTitle); ?>"></span> 
+			<span itemprop="description" content="<?php echo $this->escapeHtml($review); ?>"></span> 
 			<span itemprop="datePublished" content="<?php echo date('m/d/Y', $timestamp); ?>"></span>
 			<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
 				<span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span>
