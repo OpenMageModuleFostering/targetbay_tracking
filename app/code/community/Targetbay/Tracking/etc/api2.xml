@@ -77,6 +77,7 @@
 					<buy_now_url>Buy Now URL</buy_now_url>
 					<has_custom_options>Has Custom Options</has_custom_options>
 					<is_in_stock>Stock Status</is_in_stock>
+					<price>Price</price>
 					<special_price>Special price</special_price>
 					<regular_price_with_tax>Regular Price With Tax
 					</regular_price_with_tax>

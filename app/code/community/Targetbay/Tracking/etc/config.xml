@@ -9,7 +9,7 @@
 <config>
 	<modules>
 		<Targetbay_Tracking>
-			<version>5.1.1</version>
+			<version>5.1.2</version>
 		</Targetbay_Tracking>
 	</modules>
 	<frontend>
@@ -118,6 +118,17 @@
 				</observers>
 			</sales_quote_remove_item>
 
+			<!-- Merge quote for logged in user -->
+			<sales_quote_merge_before>
+				<observers>
+					<targetbay_tracking_event_quote_merge_before>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>quoteMergeData</method>
+					</targetbay_tracking_event_quote_merge_before>
+				</observers>
+			</sales_quote_merge_before>
+
 			<!-- cart update event -->
 			<checkout_cart_update_items_before>
 				<observers>
@@ -141,7 +152,7 @@
 			</controller_action_predispatch_checkout_cart_updatePost>
 
 			<!-- create order event -->
-			<sales_order_save_after>
+			<sales_order_place_after>
 				<observers>
 					<sales_order_place_after>
 						<type>singleton</type>
@@ -149,9 +160,20 @@
 						<method>pushOrderData</method>
 					</sales_order_place_after>
 				</observers>
+			</sales_order_place_after>
+
+			<!-- create order event -->
+			<sales_order_save_after>
+				<observers>
+					<targetbay_order_save_after>
+						<type>singleton</type>
+						<class>tracking/observer</class>
+						<method>pushOrderStatusData</method>
+					</targetbay_order_save_after>
+				</observers>
 			</sales_order_save_after>
 
-			<!-- create shipment event >
+			<!-- create shipment event -->
 			<sales_order_shipment_save_after>
 				<observers>
 					<sales_order_shipment_after>
@@ -160,7 +182,7 @@
 						<method>pushOrderShipmentData</method>
 					</sales_order_shipment_after>
 				</observers>
-			</sales_order_shipment_save_after-->
+			</sales_order_shipment_save_after>
 
 			<!-- customer login event -->
 			<customer_login>
@@ -454,12 +476,6 @@
 		<targetbay_tracking>
 			<tracking_groups>
 				<enabled>1</enabled>
-				<hostname><![CDATA[http://dev.targetbay.com/api/v1/webhooks/]]></hostname>
-				<message_js><![CDATA[http://dev.targetbay.com/js/tb-messages.js]]></message_js>
-				<review_js><![CDATA[http://dev.targetbay.com/js/tb-reviews.js]]></review_js>
-				<api_token>6e1c1435-ccc9-45e4-9eb6-a1a7bbbaf2e9</api_token>
-				<api_index>cccc8aea-ebcd-5466-8698-3657a3aa1169</api_index>
-				<debug>1</debug>
 				<debug_file>tracking.log</debug_file>
 				<page_types>all</page_types>
 			</tracking_groups>
@@ -490,4 +506,4 @@
 			</resources>
 		</acl>
 	</adminhtml>
-</config> 
+</config>

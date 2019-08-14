@@ -20,11 +20,7 @@ class Targetbay_Tracking_Model_Api2_Totalproductinfo_Rest_Guest_V1 extends Targe
 	
 		// available attributes not contain image attribute, but it needed for get image_url
 		$availableAttributes[] = 'image';
-		$collection->addAttributeToSelect(array_diff($availableAttributes, $entityOnlyAttributes))->addAttributeToFilter('visibility', array(
-				'neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE 
-		))->addAttributeToFilter('status', array(
-				'eq' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED 
-		));
+		$collection->addAttributeToSelect(array_diff($availableAttributes, $entityOnlyAttributes));
 
 		$totals = array (
 				'total_products' => $collection->getSize()

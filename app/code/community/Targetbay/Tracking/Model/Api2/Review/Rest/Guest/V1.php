@@ -17,14 +17,16 @@ class Targetbay_Tracking_Model_Api2_Review_Rest_Guest_V1 extends Mage_Api2_Model
 		$limit = Mage::app()->getRequest()->getParam('limit');
 		
 		$reviewCollection = Mage::getModel('review/review')->getResourceCollection()
-				    ->setDateOrder()
-				    ->addRateVotes()
-				    ->load();
-		$reviewCollection->getSelect()->limit($limit, $page_num);
+							->setPageSize($limit)
+            				->setCurPage($page_num)
+						    ->setDateOrder()
+						    ->addRateVotes()
+						    ->load();
 
 		$review_data = array();	
 		$review_datas = array();
 		$sku = '';
+
 		foreach($reviewCollection as $review)
         	{			
 			$storeId = Mage::getModel('review/review')->load($review->getId())->getStoreId();
@@ -67,7 +69,7 @@ class Targetbay_Tracking_Model_Api2_Review_Rest_Guest_V1 extends Mage_Api2_Model
 				$review_datas[$review->getId()][] =   $review_data;      
 			} 
 		}
-		
+
 		return $review_datas;
 	}
 }

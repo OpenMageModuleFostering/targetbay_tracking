@@ -16,6 +16,9 @@ class Targetbay_Tracking_Model_Observer
      */
     public function __construct()
     {
+        //$expireAfter = 10;
+        $expireAfter = 1380;
+
         $this->helper        = Mage::helper('tracking');
         $this->apiToken      = '?api_token=' . $this->helper->getApiToken();
         $this->indexName     = $this->helper->getApiIndex();
@@ -31,6 +34,20 @@ class Targetbay_Tracking_Model_Observer
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             Mage::getModel('core/cookie')->set('user_loggedin', true, null, null, null, null, false);
             Mage::getModel('core/cookie')->set('afterlogin_session_id', Mage::getSingleton('core/session')->getCustomerSessionId(), null, null, null, null, false);
+        }
+
+        if(isset($_SESSION['last_session'])) {
+
+            $secondsInactive = time() - $_SESSION['last_session'];
+            $expireAfterSeconds = $expireAfter * 60;
+            if($secondsInactive > $expireAfterSeconds){
+                Mage::getSingleton('core/session')->unsProductReview();
+                Mage::getSingleton('core/session')->unsProductReviewResponse();
+                Mage::getSingleton('core/session')->unsSiteReview();
+                Mage::getSingleton('core/session')->unsSiteReviewResponse();
+                Mage::getSingleton('core/session')->unsQaReview();
+                Mage::getSingleton('core/session')->unsQaReviewResponse();
+            }
         }
     }
     
@@ -100,7 +117,7 @@ class Targetbay_Tracking_Model_Observer
         
         if ($this->helper->eventAlreadyTracked($observer->getEvent()->getControllerAction()->getFullActionName())) {
             return false;
-	}
+        }
         
         // Set Token Values
         if (isset($_GET['utm_source']) && !$this->helper->cookie->get('utm_source')) {
@@ -137,7 +154,7 @@ class Targetbay_Tracking_Model_Observer
         $request = Mage::app()->getRequest();
         $trackingType = $this->helper->getTrackingType();
         $identifier   = Mage::getSingleton('cms/page')->getIdentifier();  
-	$moduleName     = $request->getModuleName();    
+        $moduleName     = $request->getModuleName();    
      
         // Page Visit Tracking
         $data = $this->helper->visitInfo();
@@ -166,45 +183,45 @@ class Targetbay_Tracking_Model_Observer
         //if ($item->getParentItem())
             //$item = $item->getParentItem();
 
-	$productInfo = $observer->getProduct();
+        $productInfo = $observer->getProduct();
 
-	$productEventInfo = $observer->getEvent()->getProduct();
-	$quote = Mage::getModel('checkout/cart')->getQuote();
-	$item = $quote->getItemByProduct( $productEventInfo );
+        $productEventInfo = $observer->getEvent()->getProduct();
+        $quote = Mage::getModel('checkout/cart')->getQuote();
+        $item = $quote->getItemByProduct( $productEventInfo );
 
-	if($productInfo->getData('type_id') == 'grouped') {
-		$productIds = Mage::app()->getRequest()->getParam('super_group');
-		$dataItem =  array(); $productData= array();
-		foreach($productIds as $id => $qty) {
-			if($qty < 1)
-				continue;
-			$product                  = Mage::getModel('catalog/product')->load($id);
-			$productData['type']         = $product->getTypeId();
-			$productData['product_id']   = $id;
-			$productData['product_sku']  = $product->getSku();
-			$productData['product_name'] = addslashes($product->getName());
-			$productData['price']        = $product->getPrice()*$qty;
-			$productData['special_price'] = $product->getSpecialPrice();
-			$productData['productimg']   = $this->helper->getImageUrl($product, 'image');
-		
-			$productData['category']      = $this->helper->getProductCategory($product);
-			$productData['category_name'] = $this->helper->getProductCategoryName($product);
-			$productData['quantity']      = $qty;
-			$productData['page_url']      = Mage::getUrl($product->getUrlPath());
-			$productData['attributes'] = '';
-			$dataItem[] = $productData;
-		}
-		$data = $this->helper->getCartInfo();
-		$data['product_type'] = $productInfo->getData('type_id');
-		$data['cart_item'] = $dataItem;	
-	} else{
-        	$data   = array_merge($this->helper->getCartInfo(), $this->helper->getItemInfo($item, Targetbay_Tracking_Helper_Data::ADDTOCART));
-		$data['product_type'] = $item->getProductType();	
-		$data['price'] = $item->getProduct()->getFinalPrice();
-		if ($customOptions = $this->helper->getCustomOptionsInfo($item, null)) {
-		    $data['attributes'] = $customOptions;
-		}
-	}
+        if($productInfo->getData('type_id') == 'grouped') {
+        	$productIds = Mage::app()->getRequest()->getParam('super_group');
+        	$dataItem =  array(); $productData= array();
+        	foreach($productIds as $id => $qty) {
+        		if($qty < 1)
+        			continue;
+        		$product                  = Mage::getModel('catalog/product')->load($id);
+        		$productData['type']         = $product->getTypeId();
+        		$productData['product_id']   = $id;
+        		$productData['product_sku']  = $product->getSku();
+        		$productData['product_name'] = addslashes($product->getName());
+        		$productData['price']        = $product->getPrice()*$qty;
+        		$productData['special_price'] = $product->getSpecialPrice();
+        		$productData['productimg']   = $this->helper->getImageUrl($product, 'image');
+        	
+        		$productData['category']      = $this->helper->getProductCategory($product);
+        		$productData['category_name'] = $this->helper->getProductCategoryName($product);
+        		$productData['quantity']      = $qty;
+        		$productData['page_url']      = Mage::getUrl($product->getUrlPath());
+        		$productData['attributes'] = '';
+        		$dataItem[] = $productData;
+        	}
+        	$data = $this->helper->getCartInfo();
+        	$data['product_type'] = $productInfo->getData('type_id');
+        	$data['cart_item'] = $dataItem;	
+        } else{
+            $data   = array_merge($this->helper->getCartInfo(), $this->helper->getItemInfo($item, Targetbay_Tracking_Helper_Data::ADDTOCART));
+        	$data['product_type'] = $item->getProductType();	
+        	$data['price'] = $item->getProduct()->getFinalPrice();
+        	if ($customOptions = $this->helper->getCustomOptionsInfo($item, null)) {
+        	    $data['attributes'] = $customOptions;
+        	}
+        }
 
         $this->pushPages($data, Targetbay_Tracking_Helper_Data::ADDTOCART);
         
@@ -311,10 +328,6 @@ class Targetbay_Tracking_Model_Observer
             return false;
         }
         
-        if ($this->helper->eventAlreadyTracked($observer->getEvent()->getControllerAction()->getFullActionName())) {
-            return false;
-	}
-        
         // Set Token Values
         if (isset($_GET['utm_source']) && !$this->helper->cookie->get('utm_source')) {
             $this->helper->cookie->set('utm_source', $_GET['utm_source'], null, null, null, null, false);
@@ -344,13 +357,17 @@ class Targetbay_Tracking_Model_Observer
      */
     public function pushBillingAddressData(Varien_Event_Observer $observer)
     {
-        if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::BILLING)) {
-            return false;
+        try {
+            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::BILLING)) {
+                return false;
+            }
+            Mage::getSingleton('checkout/session')->setTitle('Checkout Billing');
+            $quote       = Mage::getSingleton('checkout/session')->getQuote();
+            $billingInfo = $this->helper->getAddressData($quote, Targetbay_Tracking_Helper_Data::BILLING);
+            $this->pushPages($billingInfo, Targetbay_Tracking_Helper_Data::BILLING);
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
-        Mage::getSingleton('checkout/session')->setTitle('Checkout Billing');
-        $quote       = Mage::getSingleton('checkout/session')->getQuote();
-        $billingInfo = $this->helper->getAddressData($quote, Targetbay_Tracking_Helper_Data::BILLING);
-        $this->pushPages($billingInfo, Targetbay_Tracking_Helper_Data::BILLING);
         
         return;
     }
@@ -364,13 +381,17 @@ class Targetbay_Tracking_Model_Observer
      */
     public function pushShippingAddressData(Varien_Event_Observer $observer)
     {
-        if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::SHIPPING)) {
-            return false;
+        try {
+            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::SHIPPING)) {
+                return false;
+            }
+            Mage::getSingleton('checkout/session')->setTitle('Checkout Shipping');
+            $quote        = Mage::getSingleton('checkout/session')->getQuote();
+            $shippingInfo = $this->helper->getAddressData($quote, Targetbay_Tracking_Helper_Data::SHIPPING);
+            $this->pushPages($shippingInfo, Targetbay_Tracking_Helper_Data::SHIPPING);
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
-        Mage::getSingleton('checkout/session')->setTitle('Checkout Shipping');
-        $quote        = Mage::getSingleton('checkout/session')->getQuote();
-        $shippingInfo = $this->helper->getAddressData($quote, Targetbay_Tracking_Helper_Data::SHIPPING);
-        $this->pushPages($shippingInfo, Targetbay_Tracking_Helper_Data::SHIPPING);
         
         return;
     }
@@ -385,27 +406,90 @@ class Targetbay_Tracking_Model_Observer
      */
     public function pushOrderData(Varien_Event_Observer $observer)
     {
-        if (!Mage::registry('order_pushed')) {
-            Mage::register('order_pushed', true);
-            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ORDER_ITEMS)) {
+        try {
+            if (!Mage::registry('order_pushed')) {
+                Mage::register('order_pushed', true);
+                if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ORDER_ITEMS)) {
+                    return false;
+                }
+                $order  = $observer->getEvent()->getOrder();
+                $params = Mage::app()->getFrontController()->getRequest()->getParams();
+
+        	    if ($this->pushShipmentData($order, $params))
+                    return false; // order shipment process so no need to make order submit api.
+                    
+                // Captute the customer registration.
+                if ($customer = $this->helper->isRegisterCheckout($order)) {
+                    $this->pushRegisterData($customer);
+                }
+                
+                // Order Data Push to the Tag Manager
+                $orderInfo = $this->helper->getInfo($order);
+                $this->pushPages($orderInfo, Targetbay_Tracking_Helper_Data::ORDER_ITEMS);
+                Mage::getSingleton('checkout/session')->unsQuoteMerged();
+            }
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
+        }
+        
+        return;
+    }
+    
+    /**
+     * Order status change data
+     *
+     * @param Varien_Event_Observer $observer           
+     * @return Targetbay_Tracking_Model_Observer
+     *
+     * @return void|boolean
+     */
+    public function pushOrderStatusData(Varien_Event_Observer $observer)
+    {
+        try {
+            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ORDER_STATUS)) {
                 return false;
             }
             $order  = $observer->getEvent()->getOrder();
-            $params = Mage::app()->getFrontController()->getRequest()->getParams();
 
-	    if ($this->pushShipmentData($order, $params))
-		return false; // order shipment process so no need to make order submit api.
-            
-            // Captute the customer registration.
-            if ($customer = $this->helper->isRegisterCheckout($order)) {
-                $this->pushRegisterData($customer);
+            $data                    = $this->helper->getSessionInfo($order);
+            $data['first_name']      = $order->getCustomerFirstname();
+            $data['last_name']       = $order->getCustomerLastname();
+            $guestUsername = $order->getCustomerFirstname().' '.$order->getCustomerLastname();
+            $gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
+            $data['user_name']       = $order->getCustomerIsGuest() ? $gName : $data['first_name'] . ' ' . $data['last_name'];
+            $data['user_mail']       = $order->getCustomerEmail();
+            $data['order_id']        = $order->getId();
+            $data['status'] = $order->getStatus();
+            if($data['status'] === null) {
+                return false; 
             }
-            
-            // Order Data Push to the Tag Manager
-            $orderInfo = $this->helper->getInfo($order);
-            $this->pushPages($orderInfo, Targetbay_Tracking_Helper_Data::ORDER_ITEMS);
+            $this->pushPages($data, Targetbay_Tracking_Helper_Data::ORDER_STATUS);
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
         
+        return;
+    }
+    
+    /**
+     * Abandoned cart merge for logged in user
+     *
+     * @param Varien_Event_Observer $observer           
+     *
+     * @return void
+     */
+    public function quoteMergeData(Varien_Event_Observer $observer)
+    {
+        $abandonedMail = Mage::getSingleton('core/session')->getAbandonedMail();       
+        $cart = Mage::getModel('checkout/cart');
+        if($abandonedMail) {
+            try {
+                $this->helper->debug('MergeObs');
+                $cart->truncate();
+            } catch(\Exception $e) {
+                $this->helper->debug('Error:'.$e->getMessage());
+            }
+        }
         return;
     }
 	
@@ -417,13 +501,17 @@ class Targetbay_Tracking_Model_Observer
      * @return boolean
      */
     public function pushShipmentData($order, $params) {
-	if ($this->helper->isFullFillmentProcess($params)) {
-		$data = $this->helper->getFullFillmentData($order, $params);
-		$this->pushPages($data, Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT);
-		return true;
-	}
+        try {
+        	if ($this->helper->isFullFillmentProcess($params)) {
+        		$data = $this->helper->getFullFillmentData($order, $params);
+        		$this->pushPages($data, Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT);
+        		return true;
+        	}
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
+        }
 	
-	return false;
+	   return false;
     }
     
     /**
@@ -434,20 +522,23 @@ class Targetbay_Tracking_Model_Observer
      * @return boolean
      */
     public function pushOrderShipmentData(Varien_Event_Observer $observer)
-    { 
-	if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT)) {
-		return false;
-	}
+    {
+        try {
+        	if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT)) {
+        		return false;
+        	}
 
-	$shipment = $observer->getEvent()->getShipment();
-	$order  = $shipment->getOrder();
-        $params = Mage::app()->getFrontController()->getRequest()->getParams();
-
-        if ($this->helper->isFullFillmentProcess($params)) {
-            $data = $this->helper->getFullFillmentData($order, $params);
-            $this->pushPages($data, Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT);
+        	$shipment = $observer->getEvent()->getShipment();
+        	$order  = $shipment->getOrder();
+            $params[Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT] = true;
+            if ($this->helper->isFullFillmentProcess($params)) {
+                $data = $this->helper->getFullFillmentData($order, $params);
+                $this->pushPages($data, Targetbay_Tracking_Helper_Data::ORDER_SHIPMENT);
+            }
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
-	return;
+    	return;
     }
     
     /**
@@ -557,18 +648,18 @@ class Targetbay_Tracking_Model_Observer
             return false;
         }
 
-	$webstieId = Mage::app()->getStore()->getWebsiteId();
-	$customerModel = Mage::getModel('customer/customer');
+    	$webstieId = Mage::app()->getStore()->getWebsiteId();
+    	$customerModel = Mage::getModel('customer/customer');
         
         if (Mage::app()->getRequest()->getParam('email')) {
             $email      = Mage::app()->getRequest()->getParam('email');
-	    $customerData = $customerModel->setWebsiteId($webstieId)->loadByEmail($email);
-	    $customerId = $customerData->getEntityId();
+    	    $customerData = $customerModel->setWebsiteId($webstieId)->loadByEmail($email);
+    	    $customerId = $customerData->getEntityId();
         } else {
-	    $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
-	    $customerData = $customerModel->load($customerId);
-	    $email = '';
-	}
+    	    $customerId = Mage::getSingleton('customer/session')->getCustomer()->getId();
+    	    $customerData = $customerModel->load($customerId);
+    	    $email = '';
+    	}
         
         $data = $this->helper->visitInfo();
         
@@ -621,21 +712,25 @@ class Targetbay_Tracking_Model_Observer
      */
     public function pushProductData(Varien_Event_Observer $observer)
     {
-        if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ADD_PRODUCT)) {
-            return false;
-        }
-        $param   = Mage::app()->getRequest()->getParams();
-        $product = $observer->getEvent()->getProduct();
-        if ($product->getId()) {
-            $type = Targetbay_Tracking_Helper_Data::ADD_PRODUCT;
-            if ($param['id']) {
-                if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::UPDATE_PRODUCT)) {
-                    return false;
-                }
-                $type = Targetbay_Tracking_Helper_Data::UPDATE_PRODUCT;
+        try {
+            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::ADD_PRODUCT)) {
+                return false;
             }
-            $data = $this->helper->getProductData($product);
-            $this->pushPages($data, $type);
+            $param   = Mage::app()->getRequest()->getParams();
+            $product = $observer->getEvent()->getProduct();
+            if ($product->getId()) {
+                $type = Targetbay_Tracking_Helper_Data::ADD_PRODUCT;
+                if ($param['id']) {
+                    if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::UPDATE_PRODUCT)) {
+                        return false;
+                    }
+                    $type = Targetbay_Tracking_Helper_Data::UPDATE_PRODUCT;
+                }
+                $data = $this->helper->getProductData($product);
+                $this->pushPages($data, $type);
+            }
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
         
         return;
@@ -650,25 +745,29 @@ class Targetbay_Tracking_Model_Observer
      */
     public function pushDeleteProductData(Varien_Event_Observer $observer)
     {
-        if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::DELETE_PRODUCT)) {
-            return false;
-        }
-	$params = Mage::app()->getRequest()->getParams();
-
-        if ($params) {
-            $data['entity_id']  = Mage::app()->getRequest()->getParam('id');
-            $data['user_name']  = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
-            $data['user_id']    = strtotime(date('Y-m-d H:i:s'));
-            $data['session_id'] = strtotime(date('Y-m-d H:i:s'));
-            if ($this->helper->cookie->get('trackingsession')) {
-	        $data['user_id']    = $this->helper->cookie->get('trackingsession');
-                $data['session_id'] = $this->helper->cookie->get('trackingsession');
+        try {
+            if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::DELETE_PRODUCT)) {
+                return false;
             }
-            $data['date']      = $this->helper->date->date('Y-m-d');
-            $data['timestamp'] = strtotime($this->helper->date->date('Y-m-d'));
-            $data['time']      = $this->helper->date->date('H:i');
-            $data['user_mail'] = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
-            $this->pushPages($data, Targetbay_Tracking_Helper_Data::DELETE_PRODUCT);
+            $params = Mage::app()->getRequest()->getParams();
+
+            if ($params) {
+                $data['entity_id']  = Mage::app()->getRequest()->getParam('id');
+                $data['user_name']  = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
+                $data['user_id']    = strtotime(date('Y-m-d H:i:s'));
+                $data['session_id'] = strtotime(date('Y-m-d H:i:s'));
+                if ($this->helper->cookie->get('trackingsession')) {
+    	        $data['user_id']    = $this->helper->cookie->get('trackingsession');
+                    $data['session_id'] = $this->helper->cookie->get('trackingsession');
+                }
+                $data['date']      = $this->helper->date->date('Y-m-d');
+                $data['timestamp'] = strtotime($this->helper->date->date('Y-m-d'));
+                $data['time']      = $this->helper->date->date('H:i');
+                $data['user_mail'] = Targetbay_Tracking_Helper_Data::ANONYMOUS_USER;
+                $this->pushPages($data, Targetbay_Tracking_Helper_Data::DELETE_PRODUCT);
+            }
+        } catch (Exception $e) {
+            $this->helper->debug("ERROR: " . $e->getMessage());
         }
         
         return;
@@ -756,9 +855,14 @@ class Targetbay_Tracking_Model_Observer
         if (empty($keyword)) {
             return false;
         }
+        
         $data            = $this->helper->visitInfo();
         $data['keyword'] = $keyword;
-        $this->pushPages($data, Targetbay_Tracking_Helper_Data::CATALOG_SEARCH);
+
+        $trackingType = $this->helper->getTrackingType();
+        if ($trackingType != 1):
+            $this->pushPages($data, Targetbay_Tracking_Helper_Data::CATALOG_SEARCH);
+        endif;
         
         return;
     }
@@ -930,12 +1034,12 @@ class Targetbay_Tracking_Model_Observer
         if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::CUSTOMER_ACCOUNT)) {
             return false;
         }
-	Mage::getSingleton('customer/session')->setTitle('Account Information');
+        Mage::getSingleton('customer/session')->setTitle('Account Information');
         $data = $this->helper->visitInfo();
-	$data['customer_id'] = Mage::getSingleton('customer/session')->getCustomer()->getId();
-	$data['firstname'] = Mage::getSingleton('customer/session')->getCustomer()->getFirstname();
-	$data['lastname'] = Mage::getSingleton('customer/session')->getCustomer()->getLastname();
-	$data['email'] = Mage::getSingleton('customer/session')->getCustomer()->getEmail();
+        $data['customer_id'] = Mage::getSingleton('customer/session')->getCustomer()->getId();
+        $data['firstname'] = Mage::getSingleton('customer/session')->getCustomer()->getFirstname();
+        $data['lastname'] = Mage::getSingleton('customer/session')->getCustomer()->getLastname();
+        $data['email'] = Mage::getSingleton('customer/session')->getCustomer()->getEmail();
         $data['account_updated']     = Mage::getModel('core/date')->date('Y-m-d');
         $this->pushPages($data, Targetbay_Tracking_Helper_Data::CUSTOMER_ACCOUNT);
         return;
@@ -951,8 +1055,25 @@ class Targetbay_Tracking_Model_Observer
         if (!$this->helper->canTrackPages(Targetbay_Tracking_Helper_Data::PAGE_REFERRAL)) {
             return false;
         }
-        if ($referrerData = $this->helper->getRefererData()) {
-            $this->pushPages($referrerData, Targetbay_Tracking_Helper_Data::PAGE_REFERRAL);
+        try {
+            $request = Mage::app()->getRequest();
+            $trackingType = $this->helper->getTrackingType();
+            $identifier   = Mage::getSingleton('cms/page')->getIdentifier();  
+            $moduleName     = $request->getModuleName();    
+
+            if ($trackingType == 1 && ($request->getControllerName() == 'product' 
+                                        || $request->getControllerName() == 'category' 
+                                        || $moduleName == 'cms')
+                ){
+                return false;
+            }
+
+            if ($referrerData = $this->helper->getRefererData()) {
+                $this->pushPages($referrerData, Targetbay_Tracking_Helper_Data::PAGE_REFERRAL);
+            }
+        } catch(Exception $e) {
+            $this->debug('Error message '.$e->getMessage());
+            return;
         }
     }
     

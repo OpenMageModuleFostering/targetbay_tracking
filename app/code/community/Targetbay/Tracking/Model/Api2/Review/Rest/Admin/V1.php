@@ -17,10 +17,11 @@ class Targetbay_Tracking_Model_Api2_Review_Rest_Admin_V1 extends Mage_Api2_Model
 		$limit = Mage::app()->getRequest()->getParam('limit');
 		
 		$reviewCollection = Mage::getModel('review/review')->getResourceCollection()
-				    ->setDateOrder()
-				    ->addRateVotes()
-				    ->load();
-		$reviewCollection->getSelect()->limit($limit, $page_num);
+							->setPageSize($limit)
+            				->setCurPage($page_num)
+						    ->setDateOrder()
+						    ->addRateVotes()
+						    ->load();
 
 		$review_data = array();	
 		$review_datas = array();

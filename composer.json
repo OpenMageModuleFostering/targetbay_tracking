@@ -3,11 +3,11 @@
     "type": "magento-module",
     "license": "OSL-v3.0",
     "homepage": "",
-    "description": "Targetbay's Personalization platform continuously profiles in real-time, opening up the scope for behavioral targeting.",
+    "description": "Targetbay&amp;apos;s Personalization platform continuously profiles in real-time, opening up the scope for behavioral targeting.",
     "authors": [
     {
         "name": "Targetbay",
-        "email": "sathishkumar.m@innoppl.com"
+        "email": "Targetbay@gmail.com"
     }
 ],
     "suggest": {

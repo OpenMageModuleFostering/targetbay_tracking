@@ -14,6 +14,6 @@ class Targetbay_Tracking_Block_Product_Review extends Mage_Core_Block_Template
     public function _construct()
     {
         parent::_construct();
-	$this->setTemplate('tracking/product/review.phtml');
+        $this->setTemplate('tracking/product/review.phtml');
     }
 }

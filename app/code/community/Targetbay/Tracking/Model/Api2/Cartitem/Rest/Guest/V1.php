@@ -54,7 +54,7 @@ class Targetbay_Tracking_Model_Api2_Cartitem_Rest_Guest_V1 extends Targetbay_Tra
 ;
 		$collection->getSelect()->join(array('Q2'=> $quoteTable), '`main_table`.`entity_id` = `Q2`.`quote_id`', array('*'))->group('Q2.quote_id');
 		
-            	$collection->getSelect()->limit($limit, $page_num);
+        $collection->getSelect()->limit($limit, $page_num);
 		return $collection;
 	}
 }

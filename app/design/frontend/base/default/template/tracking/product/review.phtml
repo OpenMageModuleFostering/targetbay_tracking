@@ -8,6 +8,7 @@
 <?php if(!empty($richSnippets) && $richSnippets['average_score'] > 0): ?>
 <div id="<?php echo $productSku; ?>" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
         <span itemprop="bestRating" content="5"></span> 
+        <span itemprop="worstRating" content="1"></span> 
         <span itemprop="ratingValue" content="<?php echo $richSnippets['average_score']; ?>"></span> 
         <span itemprop="reviewCount" content="<?php echo $richSnippets['reviews_count']; ?>"></span>
 	<div itemprop="itemReviewed" itemscope itemtype="http://schema.org/Thing">
@@ -30,15 +31,61 @@
 		<span itemprop="name" content="<?php echo $productName; ?>"></span>
 	</div>
 	<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
-        	<span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span> 
-        	<span itemprop="bestRating" content="5"></span>
+        <span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span> 
+        <span itemprop="worstRating" content="1"></span>
+        <span itemprop="bestRating" content="5"></span>
 	</div>
 	<div itemprop="author" itemscope itemtype="http://schema.org/Thing">
-        	<span itemprop="name" content="<?php echo $userName; ?>"></span>
+        <span itemprop="name" content="<?php echo $userName; ?>"></span>
 	</div>
 </div>
 <?php endforeach; ?>
 <?php endif; ?>
 <?php else: ?>
 <div id="<?php echo $productSku; ?>"></div>
+<?php endif; ?>
+
+<?php $questionSnippets = Mage::helper('tracking')->getQuestionSnippets(); ?>
+
+<?php if(!empty($questionSnippets) && $questionSnippets['qa_count'] > 0): ?>
+<?php $authorName = $questionSnippets['qa_author']; ?>
+<?php foreach($questionSnippets['qa_details']  as $key => $qasDetails): ?>
+	<?php $productName = $qasDetails->_source->product_name; ?>
+	<?php $questionName = $qasDetails->_source->questions; ?>
+	<?php $qasCreatedDate = $qasDetails->_source->timestamp; ?>
+	<?php $qasUsername = $qasDetails->_source->user_name; ?>
+	<?php $answerArray = $qasDetails->_source->question_answers; ?>
+	<?php $qasId = $qasDetails->_id; ?>
+	<?php $i = 1; ?>
+	<div id="<?php echo 'tb-qas-'.$key; ?>" itemscope itemtype="http://schema.org/Question">
+
+		<span itemprop="name" content="<?php echo $productName; ?>"></span>
+		<span itemprop="text" content="<?php echo $questionName; ?>"></span>
+		<span itemprop="dateCreated" content="<?php echo date('m/d/Y', $qasCreatedDate); ?>"></span>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<span itemprop="name" content="<?php echo $qasUsername; ?>"></span>
+		</span>
+		<?php if(count($answerArray) > 0): ?>
+		<span itemprop="answerCount" content="<?php echo count($answerArray); ?>"></span>
+		<span itemprop="acceptedAnswer" itemscope itemtype="http://schema.org/Answer" id="<?php echo $qasId.'-0'; ?>">
+			<span itemprop="upvoteCount" content="<?php echo $answerArray[0]->upvotes; ?>"></span>
+			<span itemprop="text" content="<?php echo $answerArray[0]->answers; ?>"></span>
+			<span itemprop="dateCreated" content="<?php echo date('m/d/Y', $answerArray[0]->answer_timestamp); ?>"></span>
+			<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+				<span itemprop="name" content="<?php echo $authorName; ?>"></span>
+			</span>
+		</span>
+		<?php foreach($answerArray  as $key => $answers): ?>
+		<span itemprop="suggestedAnswer" itemscope itemtype="http://schema.org/Answer" id="<?php echo $qasId.'-'.$i; ?>">
+			<span itemprop="upvoteCount" content="<?php echo $answers->upvotes; ?>"></span>
+			<span itemprop="text" content="<?php echo $answers->answers; ?>"></span>
+	  		<span itemprop="dateCreated" content="<?php echo date('m/d/Y', $answers->answer_timestamp); ?>"></span>
+			<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+				<span itemprop="name" content="<?php echo $authorName; ?>"></span>
+			</span>
+		</span>
+		<?php $i++; endforeach; ?>
+		<?php endif; ?>
+	</div>
+<?php endforeach; ?>
 <?php endif; ?>

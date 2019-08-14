@@ -27,15 +27,12 @@ class Targetbay_Tracking_Model_Api2_Product_Rest_Guest_V1 extends Mage_Catalog_M
 		
 		// available attributes not contain image attribute, but it needed for get image_url
 		$availableAttributes[] = 'image';
-		$collection->addStoreFilter($store->getId())->addPriceData($this->_getCustomerGroupId(), $store->getWebsiteId())->addAttributeToSelect(array_diff($availableAttributes, $entityOnlyAttributes))->addAttributeToFilter('visibility', array(
-				'neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE 
-		))->addAttributeToFilter('status', array(
-				'eq' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED 
-		));
+		$collection->addStoreFilter($store->getId())->addAttributeToSelect(array_diff($availableAttributes, $entityOnlyAttributes));
+
 		$this->_applyCategoryFilter($collection);
 		$this->_applyCollectionModifiers($collection);
+		Mage::helper('tracking')->debug($collection->getSelect()->__toString());
 		$products = $collection->load();
-
 		/**
 		 *
 		 * @var Mage_Catalog_Model_Product $product
@@ -77,7 +74,8 @@ class Targetbay_Tracking_Model_Api2_Product_Rest_Guest_V1 extends Mage_Catalog_M
 		$productData['store_id'] = $product->getStoreIds();
 		$productData['url'] = $product->getUrlKey();
 		$productData['url_key'] = $product->getUrlKey();
-		$productData['special_price'] = Mage::helper('core')->currency($product->getSpecialPrice(), true, false);
+		$productData['price'] = $product->getFinalPrice();
+		$productData['special_price'] = $product->getSpecialPrice();
 
 		/**
 		 *

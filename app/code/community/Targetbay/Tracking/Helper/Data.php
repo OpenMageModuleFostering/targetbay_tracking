@@ -58,6 +58,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     CONST ORDER_SHIPMENT = 'shipment';
     CONST ORDER_INVOICE = 'invoice';
     CONST ORDER_REFUND = 'creditmemo';
+    CONST ORDER_STATUS = 'order-status';
 
     CONST HOST_STAGE = 'https://stage.targetbay.com/api/v1/webhooks/';
     CONST HOST_LIVE = 'https://app.targetbay.com/api/v1/webhooks/';
@@ -391,7 +392,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
 		$data['utm_sources'] = $this->cookie->get('utm_source') ? $this->cookie->get('utm_source') : '';
 		$data['utm_token']   = $this->cookie->get('utm_token') ? $this->cookie->get('utm_token') : '';
 		$pageTitle = Mage::app()->getLayout()->getBlock('head') ? Mage::app()->getLayout()->getBlock('head')->getTitle() : Mage::getSingleton('checkout/session')->getTitle();
-		$data['page_title']  = addslashes($pageTitle);
+		$data['page_title']  = str_replace("'", " ", $pageTitle);
 		return $data;
 	} catch (Exception $e) {
 		$this->debug('Error message:'.$e->getMessage());
@@ -547,27 +548,61 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getInfo($object)
     {  
-	try {
-		$customer                = $object->getCustomer();
-		$items                   = $object->getAllVisibleItems();
-		$data                    = $this->getSessionInfo($object);
-		$data['first_name']      = $object->getCustomerFirstname();
-		$data['last_name']       = $object->getCustomerLastname();
-		$guestUsername = $object->getCustomerFirstname().' '.$object->getCustomerLastname();
-		$gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
-		$data['user_name']       = $object->getCustomerIsGuest() ? $gName : $data['first_name'] . ' ' . $data['last_name'];
-		$data['user_mail']       = $object->getCustomerEmail();
-		$data['order_id']        = $object->getId();
-		$data['order_price']     = $object->getSubtotal();
-		$data['order_quantity']  = $object->getData('total_qty_ordered');
-		$data['shipping_method'] = $object->getData('shipping_description');
-		$data['shipping_price']  = $object->getData('shipping_amount');
-		$data['tax_amount']      = $object->getData('tax_amount');
-		$data['payment_method']  = $object->getPayment()->getMethodInstance()->getTitle();
-		$data['cart_items']      = $this->getOrderItemsInfo($object);
-		return $data;
+    	try {
+    		$customer                = $object->getCustomer();
+    		$items                   = $object->getAllVisibleItems();
+    		$data                    = $this->getSessionInfo($object);
+    		$data['first_name']      = $object->getCustomerFirstname();
+    		$data['last_name']       = $object->getCustomerLastname();
+    		$guestUsername = $object->getCustomerFirstname().' '.$object->getCustomerLastname();
+    		$gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
+    		$data['user_name']       = $object->getCustomerIsGuest() ? $gName : $data['first_name'] . ' ' . $data['last_name'];
+    		$data['user_mail']       = $object->getCustomerEmail();
+    		$data['order_id']        = $object->getId();
+    		$data['order_price']     = $object->getSubtotal();
+    		$data['order_quantity']  = $object->getData('total_qty_ordered');
+    		$data['shipping_method'] = $object->getData('shipping_description');
+    		$data['shipping_price']  = $object->getData('shipping_amount');
+    		$data['tax_amount']      = $object->getData('tax_amount');
+    		$data['payment_method']  = $object->getPayment()->getMethodInstance()->getTitle();
+    		$data['cart_items']      = $this->getOrderItemsInfo($object);
+    		return $data;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
+            return;
+        }
+    }
+    
+    /**
+     * Get the Order data
+     *
+     * @param unknown $object           
+     * @return string
+     */
+    public function getOrderInfo($object)
+    {  
+        try {
+            $customer                = $object->getCustomer();
+            $items                   = $object->getAllVisibleItems();
+            $data['user_id']         = $object->getCustomerIsGuest() ? self::ANONYMOUS_USER : $object->getCustomerId();
+            $data['first_name']      = $object->getCustomerFirstname();
+            $data['last_name']       = $object->getCustomerLastname();
+            $guestUsername = $object->getCustomerFirstname().' '.$object->getCustomerLastname();
+            $gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
+            $data['user_name']       = $object->getCustomerIsGuest() ? $gName : $data['first_name'] . ' ' . $data['last_name'];
+            $data['user_mail']       = $object->getCustomerEmail();
+            $data['order_id']        = $object->getId();
+            $data['order_status']        = $object->getStatus();
+            $data['order_price']     = $object->getSubtotal();
+            $data['order_quantity']  = $object->getData('total_qty_ordered');
+            $data['shipping_method'] = $object->getData('shipping_description');
+            $data['shipping_price']  = $object->getData('shipping_amount');
+            $data['tax_amount']      = $object->getData('tax_amount');
+            $data['payment_method']  = $object->getPayment()->getMethodInstance()->getTitle();
+            $data['cart_items']      = $this->getOrderItemsInfo($object);
+            return $data;
+        } catch (Exception $e) {
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -591,7 +626,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
 		}		
 		return $dataItems;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -604,19 +639,19 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getPaymentInfo($orderId, $orderExportApi = false)
     {
-	$paymentTitle      = '';$paymentMethod     = '';
-	try {
-		$paymentCollection = Mage::getModel('sales/order_payment')->getCollection()->addFieldToFilter('parent_id', $orderId);
-		foreach ($paymentCollection as $paymentDetails) {
-		    $paymentMethod = $paymentDetails->getMethod();
-		}
-		
-		$store        = Mage::app()->getStore();
-		$path         = 'payment/' . $paymentMethod . '/title';
-		$paymentTitle = Mage::getStoreConfig($path, $store);
-		return $paymentTitle;
+    	$paymentTitle      = '';$paymentMethod     = '';
+    	try {
+    		$paymentCollection = Mage::getModel('sales/order_payment')->getCollection()->addFieldToFilter('parent_id', $orderId);
+    		foreach ($paymentCollection as $paymentDetails) {
+    		    $paymentMethod = $paymentDetails->getMethod();
+    		}
+    		
+    		$store        = Mage::app()->getStore();
+    		$path         = 'payment/' . $paymentMethod . '/title';
+    		$paymentTitle = Mage::getStoreConfig($path, $store);
+    		return $paymentTitle;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -629,25 +664,25 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getItemInfo($item, $actionType = false)
     {
-	$dataItem = array();
-	try {
-		$product                  = Mage::getModel('catalog/product')->load($item->getData('product_id'));
-		$dataItem['type']         = $item->getProductType();
-		$dataItem['product_id']   = $item->getProductId();
-		$dataItem['product_sku']  = $item->getSku();
-		$dataItem['product_name'] = addslashes($item->getName());
-		$dataItem['price']        = $actionType ? $item->getProduct()->getPrice() : $item->getPrice();
-		$dataItem['special_price'] = $product->getSpecialPrice();
-		$qty                      = $actionType ? $item->getProduct()->getQty() : $item->getQty();
-		$dataItem['productimg']   = $this->getImageUrl($product, 'image');
-		
-		$dataItem['category']      = $this->getProductCategory($product);
-		$dataItem['category_name'] = $this->getProductCategoryName($product);
-		$dataItem['quantity']      = ($item->getData('qty_ordered')) ? $item->getData('qty_ordered') : $qty;
-		$dataItem['page_url']      = Mage::getUrl($product->getUrlPath());
-		return $dataItem;
+    	$dataItem = array();
+    	try {
+    		$product                  = Mage::getModel('catalog/product')->load($item->getData('product_id'));
+    		$dataItem['type']         = $item->getProductType();
+    		$dataItem['product_id']   = $item->getProductId();
+    		$dataItem['product_sku']  = $item->getSku();
+    		$dataItem['product_name'] = addslashes($item->getName());
+    		$dataItem['price']        = $actionType ? $item->getProduct()->getPrice() : $item->getPrice();
+    		$dataItem['special_price'] = $product->getSpecialPrice();
+    		$qty                      = $actionType ? $item->getProduct()->getQty() : $item->getQty();
+    		$dataItem['productimg']   = $this->getImageUrl($product, 'image');
+    		
+    		$dataItem['category']      = $this->getProductCategory($product);
+    		$dataItem['category_name'] = $this->getProductCategoryName($product);
+    		$dataItem['quantity']      = ($item->getData('qty_ordered')) ? $item->getData('qty_ordered') : $qty;
+    		$dataItem['page_url']      = Mage::getUrl($product->getUrlPath());
+    		return $dataItem;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -668,7 +703,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
         if (count($categoryIds)) {
             foreach ($categoryIds as $categoryId) {
                 $_category           = Mage::getModel('catalog/category')->load($categoryId);
-                $productCategories[] = $_category->getName();
+                $productCategories[] = str_replace("'", " ", $_category->getName());
             }
             
             $categoryName = implode(',', $productCategories);
@@ -719,7 +754,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
 		$optionsData        = array_merge($superAttributeInfo, $customOptionInfo);
 		return $optionsData;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -733,15 +768,15 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     public function getOptionValues($options)
     {
         $optionData = array();
-	try {
-		foreach ($options as $option) {
-		    $data['label'] = $option['label'];
-		    $data['value'] = $option['value'];
-		    $optionData[]  = $data;
-		}
-		return $optionData;
+    	try {
+    		foreach ($options as $option) {
+    		    $data['label'] = $option['label'];
+    		    $data['value'] = $option['value'];
+    		    $optionData[]  = $data;
+    		}
+    		return $optionData;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -755,31 +790,31 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAddressData($object, $type)
     {
-	try {
-		$address                   = ($type == self::SHIPPING) ? $object->getShippingAddress() : $object->getBillingAddress();
-		$addressData               = $this->getSessionInfo($object);
-		$addressData['first_name'] = $address->getFirstname();
-		$addressData['last_name']  = $address->getLastname();
-		$guestUsername = $address->getFirstname().' '.$address->getLastname();
-		$gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
-		$addressData['user_name']  = $object->getCustomerIsGuest() ? $gName : $addressData['first_name'] . ' ' . $addressData['last_name'];
-		$addressData['order_id']   = $object->getId();
-		$addressData['user_mail']  = $object->getCustomerEmail();
-		$addressData['address1']   = $address->getStreet(1);
-		$addressData['address2']   = $address->getStreet(2);
-		$addressData['city']       = $address->getCity();
-		$addressData['state']      = $address->getRegion();
-		$addressData['zipcode']    = $address->getPostcode();
-		if($address->getCountryId()) {
-			$countryName = Mage::getModel('directory/country')->loadByCode($address->getCountryId())->getName();
-		} else {
-			$countryName = '';
-		}
-		$addressData['country'] = isset($countryName) ? $countryName : $address->getCountryId();
-		$addressData['phone']      = $address->getTelephone();
-		return $addressData;
+    	try {
+    		$address                   = ($type == self::SHIPPING) ? $object->getShippingAddress() : $object->getBillingAddress();
+    		$addressData               = $this->getSessionInfo($object);
+    		$addressData['first_name'] = $address->getFirstname();
+    		$addressData['last_name']  = $address->getLastname();
+    		$guestUsername = $address->getFirstname().' '.$address->getLastname();
+    		$gName = !empty($guestUsername) ? $guestUsername : self::ANONYMOUS_USER;
+    		$addressData['user_name']  = $object->getCustomerIsGuest() ? $gName : $addressData['first_name'] . ' ' . $addressData['last_name'];
+    		$addressData['order_id']   = $object->getId();
+    		$addressData['user_mail']  = $object->getCustomerEmail();
+    		$addressData['address1']   = $address->getStreet(1);
+    		$addressData['address2']   = $address->getStreet(2);
+    		$addressData['city']       = $address->getCity();
+    		$addressData['state']      = $address->getRegion();
+    		$addressData['zipcode']    = $address->getPostcode();
+    		if($address->getCountryId()) {
+    			$countryName = Mage::getModel('directory/country')->loadByCode($address->getCountryId())->getName();
+    		} else {
+    			$countryName = '';
+    		}
+    		$addressData['country'] = isset($countryName) ? $countryName : $address->getCountryId();
+    		$addressData['phone']      = $address->getTelephone();
+    		return $addressData;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -792,45 +827,46 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getProductData($product)
     {		
-	$configOptions = array();$customOptions = array();$data = array();
-	try {
-		$data['image_url'][]      = $this->getProductImages($product);
-		$data['entity_id']        = $product->getId();
-		$data['attribute_set_id'] = $product->getEntityTypeId();
-		$data['type_id']          = $product->getTypeId();
-		$data['sku']              = $product->getSku();
-		$data['product_status']   = $product->getStatus();
-		$data['currency_type']    = Mage::app()->getStore()->getCurrentCurrencyCode();
-		
-		$data['stock_count'] = -1;
-		
-		if ($stock = $product->getData('stock_data')) {
-		    $data['stock_count'] = !empty($stock['is_in_stock']) ? $stock['qty'] : -1;
-		}
-		
-		$data['visibility']  = $product->getVisibility();
-		$data['description'] = $product->getDescription();
-		$data['price']       = $product->getPrice();
-		$data['special_price']       = $product->getSpecialPrice();
-		$data['weight']      = $product->getWeight();
-		$data['name']        = addslashes($product->getName());
-		
-		$data['category']     = $this->getProductCategory($product);
-		$data['url_key']      = $product->getUrlKey();
-		$data['full_url_key'] = $product->getProductUrl();
-		
-		if ($configData = $product->getData('configurable_attributes_data')) {
-		    $configOptions = $this->productOptions($configData, 'label');
-		}
-		if ($custOptions = $product->getData('product_options')) {
-		    $customOptions = $this->productOptions($custOptions);
-		}
-		$options = array_merge($configOptions, $customOptions);
-		if (!empty($options))
-		    $data['attributes'] = $options;
-		return $data;
+    	$configOptions = array();$customOptions = array();$data = array();
+    	try {
+    		$data['image_url'][]      = $this->getProductImages($product);
+    		$data['entity_id']        = $product->getId();
+    		$data['attribute_set_id'] = $product->getEntityTypeId();
+    		$data['type_id']          = $product->getTypeId();
+    		$data['sku']              = $product->getSku();
+    		$data['product_status']   = $product->getStatus();
+    		$data['currency_type']    = Mage::app()->getStore()->getCurrentCurrencyCode();
+    		
+    		$data['stock_count'] = -1;
+    		
+    		if($stock = $product->getData('stock_data')) {
+    		    $data['stock_count'] = !empty($stock['is_in_stock']) ? $stock['qty'] : -1;
+    		}
+    		
+    		$data['visibility']  = $product->getVisibility();
+    		$data['description'] = $product->getDescription();
+    		$data['price']       = $product->getPrice();
+    		$data['special_price']       = $product->getSpecialPrice();
+    		$data['weight']      = $product->getWeight();
+    		$data['name']        = addslashes($product->getName());
+    		
+    		$data['category']     = $this->getProductCategory($product);
+    		$data['url_key']      = $product->getUrlKey();
+    		$data['full_url_key'] = $product->getProductUrl();
+    		
+    		if($configData = $product->getData('configurable_attributes_data')) {
+    		    $configOptions = $this->productOptions($configData, 'label');
+    		}
+    		if($custOptions = $product->getData('product_options')) {
+    		    $customOptions = $this->productOptions($custOptions);
+    		}
+    		$options = array_merge($configOptions, $customOptions);
+    		if(!empty($options)) {
+    		    $data['attributes'] = $options;
+            }
+    		return $data;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -845,27 +881,27 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     public function productOptions($configData, $customOption = 'title')
     {
         $options = array();
-	try {
-		foreach ($configData as $cdata) {
-		    $attrLabel = $cdata[$customOption];
-		    if (!isset($cdata['values'])) {
-		        $options[] = array(
-		            'label' => $attrLabel,
-		            'value' => $attrLabel
-		        );
-		        continue;
-		    }
-		    foreach ($cdata['values'] as $val) {
-		        $attrVal   = $val[$customOption];
-		        $options[] = array(
-		            'label' => $attrLabel,
-		            'value' => $attrVal
-		        );
-		    }
-		}
-		return $options;
+    	try {
+    		foreach($configData as $cdata) {
+    		    $attrLabel = $cdata[$customOption];
+    		    if(!isset($cdata['values'])) {
+    		        $options[] = array(
+    		            'label' => $attrLabel,
+    		            'value' => $attrLabel
+    		        );
+    		        continue;
+    		    }
+    		    foreach($cdata['values'] as $val) {
+    		        $attrVal   = $val[$customOption];
+    		        $options[] = array(
+    		            'label' => $attrLabel,
+    		            'value' => $attrVal
+    		        );
+    		    }
+    		}
+    		return $options;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -878,15 +914,15 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getProductImages($product)
     {
-	$images = array();
-	try {
-		$images['url']             = $this->getImageUrl($product, 'image');
-		$images['position']        = 1;
-		$images['thumbnail_image'] = $this->getImageUrl($product, 'small_image');
-		$images['medium_image']    = $this->getImageUrl($product, 'thumbnail');
-		return $images;
+        $images = array();
+        try {
+        	$images['url']             = $this->getImageUrl($product, 'image');
+        	$images['position']        = 1;
+        	$images['thumbnail_image'] = $this->getImageUrl($product, 'small_image');
+        	$images['medium_image']    = $this->getImageUrl($product, 'thumbnail');
+        	return $images;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -900,13 +936,13 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getImageUrl($product, $imageType)
     {
-	if($product->getData($imageType)) {
-		$imgPath = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $product->getData($imageType);
-	} else {
-		$imgPath = '';
-	}
+        if($product->getData($imageType)) {
+        	$imgPath = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $product->getData($imageType);
+        } else {
+        	$imgPath = '';
+        }
 
-	return $imgPath;
+        return $imgPath;
     }
     
     /**
@@ -916,8 +952,12 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isFullFillmentProcess($params)
     {
-        if (isset($params[self::ORDER_SHIPMENT]) || isset($params[self::ORDER_INVOICE]) || isset($params[self::ORDER_REFUND]))
+        if(isset($params[self::ORDER_SHIPMENT]) || 
+            isset($params[self::ORDER_INVOICE]) || 
+            isset($params[self::ORDER_REFUND])
+        ) {
             return true;
+        }
         return false;
     }
     
@@ -929,27 +969,27 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getWishlistProductInfo($productId)
     {
-	$data = array();
-	try {
-		$product = Mage::getModel('catalog/product')->load($productId);
-		$qty = 1;
+    	$data = array();
+    	try {
+    		$product = Mage::getModel('catalog/product')->load($productId);
+    		$qty = 1;
 
-	 	$data['type']         = $product->getTypeId();
-		$data['product_id']   = $product->getId();
-		$data['product_sku']  = $product->getSku();
-		$data['name']  = addslashes($product->getName());
-		$data['price']        = $product->getPrice();
-		$data['special_price'] = $product->getSpecialPrice();
-		$data['productimg']   = $this->getImageUrl($product, 'image');
-		
-		$data['category']      = $this->getProductCategory($product);
-		$data['category_name'] = $this->getProductCategoryName($product);
-		$data['quantity']      = (Mage::app()->getRequest()->getParam('qty')) ? Mage::app()->getRequest()->getParam('qty') : $qty;
-		$data['page_url']      = Mage::getUrl($product->getUrlPath());
-		
-		return $data;
+    	 	$data['type']         = $product->getTypeId();
+    		$data['product_id']   = $product->getId();
+    		$data['product_sku']  = $product->getSku();
+    		$data['name']  = addslashes($product->getName());
+    		$data['price']        = $product->getPrice();
+    		$data['special_price'] = $product->getSpecialPrice();
+    		$data['productimg']   = $this->getImageUrl($product, 'image');
+    		
+    		$data['category']      = $this->getProductCategory($product);
+    		$data['category_name'] = $this->getProductCategoryName($product);
+    		$data['quantity']      = (Mage::app()->getRequest()->getParam('qty')) ? Mage::app()->getRequest()->getParam('qty') : $qty;
+    		$data['page_url']      = Mage::getUrl($product->getUrlPath());
+    		
+    		return $data;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -963,17 +1003,17 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     public function getWishlistItemsInfo($wishlistInfo)
     {        
         $dataItems              = array();
-	try {
-		$wishlistItemCollection = $wishlistInfo->setStoreId(1)->getItemCollection();
-		
-		foreach ($wishlistItemCollection as $id => $wishlistItem) {            
-		    $product        = $wishlistItem->getProduct();
-		    $dataItem       = $this->wishlistProductInfo($product);
-		    $dataItems[$id] = $dataItem;
-		}
+    	try {
+    		$wishlistItemCollection = $wishlistInfo->setStoreId(1)->getItemCollection();
+    		
+    		foreach ($wishlistItemCollection as $id => $wishlistItem) {            
+    		    $product        = $wishlistItem->getProduct();
+    		    $dataItem       = $this->wishlistProductInfo($product);
+    		    $dataItems[$id] = $dataItem;
+    		}
         	return $dataItems;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -986,21 +1026,21 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */    
     public function wishlistProductInfo($product)
     {
-	$dataItem = array();
-	try {
-		$product                  = Mage::getModel('catalog/product')->load($product->getData('entity_id'));
-		$dataItem['type']         = $product->getTypeId();
-		$dataItem['product_id']   = $product->getId();
-		$dataItem['product_name'] = addslashes($product->getName());
-		$dataItem['price']        = $product->getPrice();
-		$dataItem['special_price'] = $product->getSpecialPrice();
-		$dataItem['productimg']   = $this->getImageUrl($product, 'image');        
-		$dataItem['category']      = $this->getProductCategory($product);
-		$dataItem['category_name'] = $this->getProductCategoryName($product);
-		$dataItem['page_url']      = Mage::getUrl($product->getUrlPath());
-		return $dataItem;
+    	$dataItem = array();
+    	try {
+    		$product = Mage::getModel('catalog/product')->load($product->getData('entity_id'));
+    		$dataItem['type']         = $product->getTypeId();
+    		$dataItem['product_id']   = $product->getId();
+    		$dataItem['product_name'] = addslashes($product->getName());
+    		$dataItem['price']        = $product->getPrice();
+    		$dataItem['special_price'] = $product->getSpecialPrice();
+    		$dataItem['productimg']   = $this->getImageUrl($product, 'image');        
+    		$dataItem['category']      = $this->getProductCategory($product);
+    		$dataItem['category_name'] = $this->getProductCategoryName($product);
+    		$dataItem['page_url']      = Mage::getUrl($product->getUrlPath());
+    		return $dataItem;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
         
@@ -1014,32 +1054,32 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getFullFillmentData($order, $params)
     {
-	$shipmetItems = array();
-	$shipmentsInfo = array();
-	try {
-		if (isset($params[self::ORDER_SHIPMENT])) {
-		    $shipmentsInfo['order_id']          = $order->getId();
-		    $shipmentsInfo['order_status']      = $order->getStatus();
-		    $shipmentsInfo['total_ordered_qty'] = (int)$order->getData('total_qty_ordered');
-		    $shipmentsInfo['user_id']           = $order->getData('customer_is_guest') ? self::ANONYMOUS_USER : $order->getData('customer_id');
-		    $shipmentsInfo['user_mail']         = $order->getData('customer_is_guest') ? $order->getData('customer_email') : $order->getData('customer_email');
-		    $shipmentsInfo['created_at'] = $order->getData('updated_at');
+    	$shipmetItems = array();
+    	$shipmentsInfo = array();
+    	try {
+    		if (isset($params[self::ORDER_SHIPMENT])) {
+    		    $shipmentsInfo['order_id']          = $order->getId();
+    		    $shipmentsInfo['order_status']      = $order->getStatus();
+    		    $shipmentsInfo['total_ordered_qty'] = (int)$order->getData('total_qty_ordered');
+    		    $shipmentsInfo['user_id']           = $order->getData('customer_is_guest') ? self::ANONYMOUS_USER : $order->getData('customer_id');
+    		    $shipmentsInfo['user_mail']         = $order->getData('customer_is_guest') ? $order->getData('customer_email') : $order->getData('customer_email');
+    		    $shipmentsInfo['created_at'] = $order->getData('updated_at');
 
-		    foreach ($order->getAllVisibleItems() as $item) {
-		        if ($item->getQtyShipped() == '')
-		            continue;
-		        $shipmentItemInfo['product_id']  = $item->getProductId();
-		        $shipmentItemInfo['name']        = addslashes($item->getName());
-		        $shipmentItemInfo['sku']         = $item->getSku();
-		        $shipmentItemInfo['qty_ordered'] = (int)$item->getQtyOrdered();
-		        $shipmentItemInfo['qty_shipped'] = (int)$item->getQtyShipped();
-		        $shipmetItems[]                  = $shipmentItemInfo;
-		    }
-		    $shipmentsInfo['shipment_items'] = $shipmetItems;
-		    return $shipmentsInfo;
-		}
+    		    foreach ($order->getAllVisibleItems() as $item) {
+    		        if ($item->getQtyShipped() == '')
+    		            continue;
+    		        $shipmentItemInfo['product_id']  = $item->getProductId();
+    		        $shipmentItemInfo['name']        = addslashes($item->getName());
+    		        $shipmentItemInfo['sku']         = $item->getSku();
+    		        $shipmentItemInfo['qty_ordered'] = (int)$item->getQtyOrdered();
+    		        $shipmentItemInfo['qty_shipped'] = (int)$item->getQtyShipped();
+    		        $shipmetItems[]                  = $shipmentItemInfo;
+    		    }
+    		    $shipmentsInfo['shipment_items'] = $shipmetItems;
+    		    return $shipmentsInfo;
+    		}
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -1154,30 +1194,55 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getProductViewData()
     {
-	$data = array();      
-        // Get the base visit info
-	try {
-		$data        = $this->visitInfo();
-		$product     = Mage::registry('product');
-		$categoryIds = $product->getCategoryIds();
-		if (count($categoryIds)) {
-		    $firstCategoryId  = $categoryIds[0];
-		    $_category        = Mage::getModel('catalog/category')->load($firstCategoryId);
-		    $data['category'] = $_category->getName();
-		}
-		$data['product_id']   = $product->getId();
-		$data['product_name'] = addslashes($product->getName());
-		$data['price']        = $product->getPrice();
-		$data['special_price'] = $product->getSpecialPrice();
-		$data['productimg']   = $product->getImageUrl();
-		$data['stock']        = self::OUT_OF_STOCK;
-		$stock                = $product->getStockItem();
-		if ($stock->getIsInStock()) {
-		    $data['stock'] = self::IN_STOCK;
-		}
-		return $data;
+    	$data = array();      
+            // Get the base visit info
+    	try {
+    		$data        = $this->visitInfo();
+    		$product     = Mage::registry('product');
+    		$categoryIds = $product->getCategoryIds();
+    		if (count($categoryIds)) {
+    		    $firstCategoryId  = $categoryIds[0];
+    		    $_category        = Mage::getModel('catalog/category')->load($firstCategoryId);
+    		    $data['category'] = $_category->getName();
+    		}
+    		$data['product_id']   = $product->getId();
+    		$data['product_name'] = addslashes($product->getName());
+    		$data['price']        = $product->getPrice();
+    		$data['special_price'] = $product->getSpecialPrice();
+    		$data['productimg']   = $product->getImageUrl();
+    		$data['stock']        = self::OUT_OF_STOCK;
+    		$stock                = $product->getStockItem();
+    		if ($stock->getIsInStock()) {
+    		    $data['stock'] = self::IN_STOCK;
+    		}
+    		return $data;
         } catch (Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
+            $this->debug('Error message '.$e->getMessage());
+            return;
+        }
+    }
+    
+    /**
+     * Catalog search result page
+     *
+     * @param Varien_Event_Observer $observer           
+     *
+     * @return void
+     */
+    public function getCatalogSearchResultData()
+    {
+        $data = array(); 
+
+        try {
+            $keyword = Mage::app()->getRequest()->getParam('q');
+            if (empty($keyword)) {
+                return false;
+            }
+            $data            = $this->visitInfo();
+            $data['keyword'] = $keyword;
+            return $data;
+        } catch (Exception $e) {
+            $this->debug('Error message '.$e->getMessage());
             return;
         }
     }
@@ -1190,7 +1255,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     public function getPageInfo()
     {        
         $controllername = Mage::app()->getRequest()->getControllerName();
-	$moduleName     = Mage::app()->getRequest()->getModuleName();
+	    $moduleName     = Mage::app()->getRequest()->getModuleName();
 
         if ($moduleName == 'cms') {
             $data = $this->getPageVisitData();
@@ -1198,6 +1263,8 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
             $data = $this->getCategoryViewData();
         } elseif ($controllername == 'product') {
             $data = $this->getProductViewData();
+        } elseif ($moduleName == 'catalogsearch') {
+            $data = $this->getCatalogSearchResultData();
         }
         $data['index_name'] = $this->getApiIndex();
         
@@ -1212,7 +1279,7 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
     public function getApiUrl()
     {        
         $controllername = Mage::app()->getRequest()->getControllerName();
-	$moduleName     = Mage::app()->getRequest()->getModuleName(); 
+	    $moduleName     = Mage::app()->getRequest()->getModuleName(); 
         $endPointUrl    = '';
         
         if ($moduleName == 'cms') {
@@ -1223,6 +1290,9 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
             $endPointUrl = $this->getHostname() . $type . '?api_token=' . $this->getApiToken();
         } elseif ($controllername == 'product') {
             $type        = 'product-view';
+            $endPointUrl = $this->getHostname() . $type . '?api_token=' . $this->getApiToken();
+        } elseif ($moduleName == 'catalogsearch') {
+            $type        = 'searched';
             $endPointUrl = $this->getHostname() . $type . '?api_token=' . $this->getApiToken();
         }
         
@@ -1344,34 +1414,44 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */ 
     public function getRichSnippets()
     { 
-	$data = array();
-	$responseData = '';        
+        $data = array();
+        $responseData = '';       
         $controllername = Mage::app()->getRequest()->getControllerName();
-	$moduleName     = Mage::app()->getRequest()->getModuleName();
+        $moduleName     = Mage::app()->getRequest()->getModuleName();
+        $productReviewCount = Mage::getSingleton('core/session')->getProductReview();
         try {
-		$type = self::RATINGS_STATS;
-		$apiToken = '?api_token=' . $this->getApiToken();
-		$feedUrl = $this->getHostname() . $type . $apiToken;
-		$data['index_name'] = $this->getApiIndex();
-		if($moduleName == 'catalog' && $controllername == 'product') {
-		$productId = Mage::registry('product')->getId();
-		$data['product_id'] = $productId;
-		}
+    		$type = self::RATINGS_STATS;
+    		$apiToken = '?api_token=' . $this->getApiToken();
+    		$feedUrl = $this->getHostname() . $type . $apiToken;
+    		$data['index_name'] = $this->getApiIndex();
+    		if($moduleName == 'catalog' && $controllername == 'product') {
+        		$productId = Mage::registry('product')->getId();
+        		$data['product_id'] = $productId;
+    		}
 
-		$jsondata = json_encode($data);	
-		$response = $this->postPageInfo($feedUrl, $jsondata);
-
+            if($productReviewCount < 1 || $productReviewCount == '') {
+        		$jsondata = json_encode($data);	
+        		$response = $this->postPageInfo($feedUrl, $jsondata);
                 $body = json_decode($response);
-		if(!empty($body)) {
-		        $averageScore = $body->reviews_average;
-		        $reviewsCount = $body->reviews_count;
-		        $reviewsDetails = $body->reviews;
-			$responseData = array( "average_score" => $averageScore, "reviews_count" => $reviewsCount, "reviews" => $reviewsDetails);
-			return $responseData;
-		}
+
+                if($body->reviews_count > 1) {
+                    $_SESSION['last_session'] = time();
+                    Mage::getSingleton('core/session')->setProductReview($body->reviews_count);
+                    Mage::getSingleton('core/session')->setProductReviewResponse($body);
+                }
+            }
+
+            $responseBody = Mage::getSingleton('core/session')->getProductReviewResponse();
+    		if(!empty($responseBody)) {
+    		    $averageScore = $responseBody->reviews_average;
+    		    $reviewsCount = $responseBody->reviews_count;
+    		    $reviewsDetails = $responseBody->reviews;
+    			$responseData = array( "average_score" => $averageScore, "reviews_count" => $reviewsCount, "reviews" => $reviewsDetails);
+    			return $responseData;
+    		}
         } catch(Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
-	    return;
+    	    $this->debug('Error message '.$e->getMessage());
+    	    return;
         }
     }
     
@@ -1382,20 +1462,20 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */ 
     public function getTargetbayReviewId()
     {  
-	$itemRefData = array();
-	$itemRef = '';
+        $itemRefData = array();
+        $itemRef = '';
         try {
-		$trackingSnippet = $this->getRichSnippets();
-		if($trackingSnippet['reviews_count'] > 0) {
-			foreach($trackingSnippet['reviews'] as $key => $aggregateReviewDetails) {
-				$itemRefData[]= 'tb-review-'.$key;
-			}
-			$itemRef = implode(' ', $itemRefData);
-		}
-		return $itemRef;
+    		$trackingSnippet = $this->getRichSnippets();
+    		if($trackingSnippet['reviews_count'] > 0) {
+    			foreach($trackingSnippet['reviews'] as $key => $aggregateReviewDetails) {
+    				$itemRefData[]= 'tb-review-'.$key;
+    			}
+    			$itemRef = implode(' ', $itemRefData);
+    		}
+    		return $itemRef;
         } catch(Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
-	    return;
+    	    $this->debug('Error message '.$e->getMessage());
+    	    return;
         }
     }
     
@@ -1406,28 +1486,86 @@ class Targetbay_Tracking_Helper_Data extends Mage_Core_Helper_Abstract
      */ 
     public function getSiteReviewSnippets()
     { 
-	$data = array();
-	$responseData = '';
+    	$data = array();
+    	$responseData = '';
+        $siteReviewCount = Mage::getSingleton('core/session')->getSiteReview();
         try {
-		$type = self::RATINGS_STATS;
-		$apiToken = '?api_token=' . $this->getApiToken();
-		$feedUrl = $this->getHostname() . $type . $apiToken;
-		$data['index_name'] = $this->getApiIndex();
+    		$type = self::RATINGS_STATS;
+    		$apiToken = '?api_token=' . $this->getApiToken();
+    		$feedUrl = $this->getHostname() . $type . $apiToken;
+    		$data['index_name'] = $this->getApiIndex();
 
-		$jsondata = json_encode($data);	
-		$response = $this->postPageInfo($feedUrl, $jsondata);
-
+            if($siteReviewCount < 1 || $siteReviewCount == '') {
+        		$jsondata = json_encode($data);	
+        		$response = $this->postPageInfo($feedUrl, $jsondata);
                 $body = json_decode($response);
-		if(!empty($body)) {
-		        $averageScore = $body->reviews_average;
-		        $reviewsCount = $body->reviews_count;
-		        $reviewsDetails = $body->reviews;
-			$responseData = array( "average_score" => $averageScore, "reviews_count" => $reviewsCount, "reviews" => $reviewsDetails);
-			return $responseData;
-		}
+
+                if($body->reviews_count > 1) {
+                    Mage::getSingleton('core/session')->setSiteReview($body->reviews_count);
+                    Mage::getSingleton('core/session')->setSiteReviewResponse($body);
+                    $_SESSION['last_session'] = time();
+                }
+            }
+
+            $responseBody = Mage::getSingleton('core/session')->getSiteReviewResponse();
+    		if(!empty($responseBody)) {
+    		        $averageScore = $responseBody->reviews_average;
+    		        $reviewsCount = $responseBody->reviews_count;
+    		        $reviewsDetails = $responseBody->reviews;
+    		$responseData = array( "average_score" => $averageScore, "reviews_count" => $reviewsCount, "reviews" => $reviewsDetails);
+    			return $responseData;
+    		}
         } catch(Exception $e) {
-	    $this->debug('Error message '.$e->getMessage());
-	    return;
+    	    $this->debug('Error message '.$e->getMessage());
+    	    return;
+        }
+    }
+
+    /**
+     * Get the targetbay review count and rating for product
+     *          
+     * @return array
+     */ 
+    public function getQuestionSnippets()
+    { 
+        $data = array();
+        $responseData = '';        
+        $controllername = Mage::app()->getRequest()->getControllerName();
+        $moduleName     = Mage::app()->getRequest()->getModuleName();
+        $qaReviewCount = Mage::getSingleton('core/session')->getQaReview();
+        try {
+            $type = self::QUESTION_STATS;
+            $apiToken = '?api_token=' . $this->getApiToken();
+            $feedUrl = $this->getHostname() . $type . $apiToken;
+            $data['index_name'] = $this->getApiIndex();
+            if($moduleName == 'catalog' && $controllername == 'product') {
+                $productId = Mage::registry('product')->getId();
+                $data['product_id'] = $productId;
+            }
+
+            if($qaReviewCount < 1 || $qaReviewCount == '') {
+                $jsondata = json_encode($data); 
+                $response = $this->postPageInfo($feedUrl, $jsondata);
+                $body = json_decode($response);
+
+                if($body->qa_count > 1) {
+                    Mage::getSingleton('core/session')->setQaReview($body->qa_count);
+                    Mage::getSingleton('core/session')->setQaReviewResponse($body);
+                    $_SESSION['last_session'] = time();
+                }
+            }
+
+            $responseBody = Mage::getSingleton('core/session')->getQaReviewResponse();
+            if(!empty($responseBody)) {
+                $qaCount = $responseBody->qa_count;
+                $qaDetails = $responseBody->qas;
+                $qaAuthor = $responseBody->client;
+                $responseData = array("qa_count" => $qaCount, "qa_details" => $qaDetails, "qa_author" => $qaAuthor);
+                return $responseData;
+            }
+        } catch(Exception $e) {
+            $this->debug('Error message '.$e->getMessage());
+            return;
         }
     }
 }

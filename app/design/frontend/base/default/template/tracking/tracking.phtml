@@ -36,7 +36,7 @@ if($trackingScript) {
 	$trackingCode = $trackingScript;
 } else {
 	$trackingCode = 'tbTrack: true,
-			 tbMessage: true,
+			 tbMessage: false,
 			 tbReview: {
 				tbSiteReview: true,	
 				tbProductReview: true,
@@ -97,7 +97,7 @@ tbConfig = {
 	<?php foreach($siteReviewSnippets['reviews']  as $key => $aggregateReviewDetails): ?>
 		<?php $reviewId = $aggregateReviewDetails->_id; ?>
 		<?php $reviewTitle = $aggregateReviewDetails->_source->title; ?>
-		<?php $review = $aggregateReviewDetails->_source->message;; ?>
+		<?php $review = $aggregateReviewDetails->_source->message; ?>
 		<?php $timestamp = $aggregateReviewDetails->_source->timestamp; ?>
 		<?php $reviewRating = $aggregateReviewDetails->_source->review_rating; ?>
 		<?php $userName = $aggregateReviewDetails->_source->user_name; ?>
@@ -107,7 +107,8 @@ tbConfig = {
 			<span itemprop="description" content="<?php echo $review; ?>"></span> 
 			<span itemprop="datePublished" content="<?php echo date('m/d/Y', $timestamp); ?>"></span>
 			<div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
-				<span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span> 
+				<span itemprop="ratingValue" content="<?php echo $reviewRating; ?>"></span>
+        		<span itemprop="worstRating" content="1"></span>
 				<span itemprop="bestRating" content="5"></span>
 			</div>
 			<div itemprop="author" itemscope itemtype="http://schema.org/Thing">
