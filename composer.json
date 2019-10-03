@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Targetbay_Tracking",
+    "name": "OpenMageModuleFostering\/Targetbay_Tracking",
     "type": "magento-module",
     "license": "OSL-v3.0",
     "homepage": "",
     "description": "Targetbay Personalization platform continuously profiles in real-time, opening up the scope for behavioral targeting.",
     "authors": [
-    {
-        "name": "Targetbay",
-        "email": "targetbay@gmail.com"
-    }
-],
+        {
+            "name": "Targetbay",
+            "email": "targetbay@gmail.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
